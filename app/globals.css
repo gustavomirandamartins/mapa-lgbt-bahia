@@ -126,10 +126,11 @@ body {
     #f2f2f7;
 }
 
-/* Mapa ocupa a viewport inteira atrás dos overlays */
+/* Mapa ocupa a viewport inteira atrás dos overlays.
+   O posicionamento é inline (bahia-map.tsx) para não perder a disputa de
+   cascata com o .maplibregl-map do CSS do MapLibre. */
 .map-container {
-  position: fixed;
-  inset: 0;
+  z-index: 0;
 }
 
 .maplibregl-ctrl-attrib {

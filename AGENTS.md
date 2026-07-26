@@ -14,9 +14,13 @@ Turismo LGBTQIAPN+ (IDT-LGBT) dos 417 municípios da Bahia — SETUR-BA.
 - **Next.js 16** (App Router, Turbopack) + React 19 + TypeScript
 - **TailwindCSS v4** (CSS-first, `@theme` em `app/globals.css`)
 - **Supabase** (PostgreSQL + Auth + RLS). **Sem service key no frontend.**
-- **MapLibre GL v6** (imports nomeados, sem default export) + basemap CARTO
-  Positron (gratuito) + GeoJSON IBGE em `public/geo/`
-- **Vercel** (deploy), PWA via `app/manifest.ts` + `app/icon.svg`
+- **MapLibre GL v6** (imports nomeados, sem default export) com **estilo 100%
+  local** (sem tiles externos — o GeoJSON IBGE dos municípios é o próprio
+  mapa). O worker é servido de `public/vendor/` via `setWorkerUrl()` porque o
+  Turbopack não publica `maplibre-gl-worker.mjs` automaticamente —
+  **ao atualizar `maplibre-gl`, copiar novamente
+  `node_modules/maplibre-gl/dist/{maplibre-gl-worker,maplibre-gl-shared}.mjs`
+  para `public/vendor/`**.- **Vercel** (deploy), PWA via `app/manifest.ts` + `app/icon.svg`
 
 ## Comandos
 

@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Map as MapLibreMap,
   NavigationControl,
+  setWorkerUrl,
   type StyleSpecification,
 } from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
@@ -26,7 +27,7 @@ const ESTILO_LOCAL: StyleSpecification = {
     {
       id: "background",
       type: "background",
-      paint: { "background-color": "#e9ebf2" },
+      paint: { "background-color": "#f6f7fb" },
     },
   ],
 };
@@ -68,6 +69,9 @@ export function BahiaMap({ indices, municipios }: BahiaMapProps) {
   useEffect(() => {
     if (!containerRef.current || mapRef.current) return;
 
+    // Turbopack não publica o worker do MapLibre; usamos a cópia em /public.
+    setWorkerUrl("/vendor/maplibre-gl-worker.mjs");
+
     const map = new MapLibreMap({
       container: containerRef.current,
       style: ESTILO_LOCAL,
@@ -82,6 +86,8 @@ export function BahiaMap({ indices, municipios }: BahiaMapProps) {
       pitchWithRotate: false,
       touchPitch: false,
       fadeDuration: 0,
+      // Permite capturas de tela/compartilhamento do mapa renderizado
+      canvasContextAttributes: { preserveDrawingBuffer: true },
     });
     mapRef.current = map;
 
@@ -129,8 +135,8 @@ export function BahiaMap({ indices, municipios }: BahiaMapProps) {
           "fill-opacity": [
             "case",
             ["boolean", ["feature-state", "hover"], false],
-            0.92,
-            0.78,
+            1,
+            0.9,
           ],
         },
       });
@@ -141,8 +147,8 @@ export function BahiaMap({ indices, municipios }: BahiaMapProps) {
         source: "municipios",
         paint: {
           "line-color": "#ffffff",
-          "line-width": 0.8,
-          "line-opacity": 0.95,
+          "line-width": 1.1,
+          "line-opacity": 1,
         },
       });
 
@@ -265,7 +271,12 @@ export function BahiaMap({ indices, municipios }: BahiaMapProps) {
 
   return (
     <>
-      <div ref={containerRef} className="map-container" aria-label="Mapa da Bahia" />
+      <div
+        ref={containerRef}
+        className="map-container"
+        style={{ position: "fixed", inset: 0, width: "100%", height: "100%" }}
+        aria-label="Mapa da Bahia"
+      />
       {selecao && (
         <MunicipioCard
           nome={nomeSelecionado}

@@ -218,7 +218,7 @@ export const TOTAL_PERGUNTAS = IDT_QUESTIONARIO.reduce(
 // Classificação (faixas oficiais)
 // ----------------------------------------------------------------------------
 
-export const COR_SEM_DADOS = "#cbd5e1";
+export const COR_SEM_DADOS = "#c3ccd9";
 
 export const CLASSIFICACOES: (IdtClassificacao & { min: number; max: number })[] = [
   { min: 0, max: 20, nivel: "Município Inexistente", faixa: "0–20", cor: "#ef4444" },
