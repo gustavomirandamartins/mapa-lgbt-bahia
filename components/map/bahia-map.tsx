@@ -45,8 +45,9 @@ function criarPrng(seed = 123456789) {
 }
 
 /**
- * Cria uma textura de relevo terrestre: cinza escuro com sombreamento
- * topográfico e notas de rosa choque. Padrão 100% sem emendas.
+ * Cria uma textura de relevo terrestre em tom de rosa escuro com linhas de
+ * contorno e notas de rosa choque. As extremidades escurecem para chumbo via
+ * vinheta estática aplicada sobre o mapa (app/page.tsx). Sem emendas.
  */
 function criarTexturaTerra(tamanho = 128): ImageData {
   const canvas = document.createElement("canvas");
@@ -58,11 +59,11 @@ function criarTexturaTerra(tamanho = 128): ImageData {
 
   const prng = criarPrng(1969);
 
-  // Base cinza escuro
-  c.fillStyle = "#4a4a4a";
+  // Base rosa escuro
+  c.fillStyle = "#5e2136";
   c.fillRect(0, 0, tamanho, tamanho);
 
-  // Linhas de contorno / relevo em tons de cinza (sempre com período divisível
+  // Linhas de contorno / relevo em variações do rosa escuro (período divisível
   // pelo tamanho para manter o padrão sem emendas)
   c.lineWidth = 0.7;
   for (let i = 0; i < 10; i++) {
@@ -70,10 +71,8 @@ function criarTexturaTerra(tamanho = 128): ImageData {
     const amplitude = 3 + prng() * 7;
     const fase = prng() * Math.PI * 2;
     const yOffset = prng() * tamanho;
-    const clareza = prng() > 0.5 ? 0.07 : -0.05;
-    const base = 74;
-    const valor = Math.max(0, Math.min(255, base + clareza * 255));
-    c.strokeStyle = `rgb(${valor},${valor},${valor})`;
+    const claro = prng() > 0.5;
+    c.strokeStyle = claro ? "rgba(148,63,96,0.6)" : "rgba(70,20,42,0.6)";
     c.beginPath();
     for (let x = 0; x <= tamanho + 1; x++) {
       const y = yOffset + amplitude * Math.sin((2 * Math.PI * x) / periodo + fase);
@@ -83,8 +82,7 @@ function criarTexturaTerra(tamanho = 128): ImageData {
     c.stroke();
   }
 
-  // Notas de rosa choque — pontos e traços pequenos, duplicados nas bordas para
-  // evitar emendas visíveis
+  // Notas de rosa choque — pontos e traços pequenos, duplicados nas bordas
   c.fillStyle = ROSA_CHOQUE;
   c.strokeStyle = ROSA_CHOQUE;
   function desenharNota(x: number, y: number) {
@@ -102,7 +100,7 @@ function criarTexturaTerra(tamanho = 128): ImageData {
       c.stroke();
     }
   }
-  for (let i = 0; i < 30; i++) {
+  for (let i = 0; i < 26; i++) {
     const x = prng() * tamanho;
     const y = prng() * tamanho;
     const dx = x > tamanho - 4 ? x - tamanho : x < 4 ? x + tamanho : 0;
@@ -114,6 +112,75 @@ function criarTexturaTerra(tamanho = 128): ImageData {
   }
 
   return ctx.getImageData(0, 0, tamanho, tamanho);
+}
+
+// ----------------------------------------------------------------------------
+// Mar animado — bolhas de gradiente em tons de mar que derivam lentamente,
+// simulando a vista superior do oceano em movimento.
+// ----------------------------------------------------------------------------
+
+const TONS_MAR = [
+  [255, 255, 255], // brilho
+  [147, 197, 253], // blue-300
+  [96, 165, 250], // blue-400
+  [191, 219, 254], // blue-200
+  [59, 130, 246], // blue-500
+] as const;
+
+interface BolhaMar {
+  x: number;
+  y: number;
+  r: number;
+  dx: number;
+  dy: number;
+  freq: number;
+  fase: number;
+  cor: readonly [number, number, number];
+  alpha: number;
+}
+
+function criarBolhasMar(seed: number, quantidade: number): BolhaMar[] {
+  const prng = criarPrng(seed);
+  const bolhas: BolhaMar[] = [];
+  for (let i = 0; i < quantidade; i++) {
+    bolhas.push({
+      x: prng() * 256,
+      y: prng() * 256,
+      r: 34 + prng() * 62,
+      dx: 14 + prng() * 26,
+      dy: 14 + prng() * 26,
+      freq: 0.35 + prng() * 0.5,
+      fase: prng() * Math.PI * 2,
+      cor: TONS_MAR[Math.floor(prng() * TONS_MAR.length)],
+      alpha: 0.2 + prng() * 0.22,
+    });
+  }
+  return bolhas;
+}
+
+function desenharMar(
+  c: CanvasRenderingContext2D,
+  t: number,
+  tamanho: number,
+  bolhas: BolhaMar[]
+) {
+  c.fillStyle = "#dbeafe";
+  c.fillRect(0, 0, tamanho, tamanho);
+  for (const b of bolhas) {
+    const x = b.x + Math.sin(t * b.freq + b.fase) * b.dx;
+    const y = b.y + Math.cos(t * b.freq * 0.83 + b.fase) * b.dy;
+    // Desenha espelhado nas bordas para manter o tile sem emendas
+    for (const ox of [-tamanho, 0, tamanho]) {
+      for (const oy of [-tamanho, 0, tamanho]) {
+        const [r, g, bCor] = b.cor;
+        const grad = c.createRadialGradient(x + ox, y + oy, 0, x + ox, y + oy, b.r);
+        grad.addColorStop(0, `rgba(${r},${g},${bCor},${b.alpha})`);
+        grad.addColorStop(1, `rgba(${r},${g},${bCor},0)`);
+        c.fillStyle = grad;
+        c.fillRect(0, 0, tamanho, tamanho);
+      }
+    }
+  }
 }
 
 /** Bounding box do estado da Bahia. */
@@ -185,10 +252,37 @@ export function BahiaMap({ indices, municipios }: BahiaMapProps) {
       console.error("[mapa]", event.error?.message ?? event);
     });
 
+    // Canvas do mar animado (atualizado por intervalo)
+    const tamanhoMar = 256;
+    const canvasMar = document.createElement("canvas");
+    canvasMar.width = tamanhoMar;
+    canvasMar.height = tamanhoMar;
+    const ctxMar = canvasMar.getContext("2d");
+    const bolhasMar = criarBolhasMar(2024, 9);
+    let intervaloMar: number | undefined;
+
     map.on("load", async () => {
-      // Padrão de relevo terrestre (cinza escuro + rosa choque)
+      // Padrão de relevo terrestre (rosa escuro + rosa choque)
       const textura = criarTexturaTerra();
       map.addImage("terra-texture", textura, { pixelRatio: 1 });
+
+      // Mar animado: registra o primeiro frame e agenda atualizações
+      if (ctxMar) {
+        desenharMar(ctxMar, 0, tamanhoMar, bolhasMar);
+        map.addImage("mar-anim", ctxMar.getImageData(0, 0, tamanhoMar, tamanhoMar), {
+          pixelRatio: 1,
+        });
+        let frame = 0;
+        intervaloMar = window.setInterval(() => {
+          if (mapRef.current !== map) return;
+          frame += 1;
+          desenharMar(ctxMar, frame * 0.06, tamanhoMar, bolhasMar);
+          map.updateImage(
+            "mar-anim",
+            ctxMar.getImageData(0, 0, tamanhoMar, tamanhoMar)
+          );
+        }, 120);
+      }
 
       const [terra, agua, geojson, contorno] = await Promise.all([
         fetch("/geo/terra.geojson").then((r) => r.json()),
@@ -224,13 +318,13 @@ export function BahiaMap({ indices, municipios }: BahiaMapProps) {
         },
       });
 
-      // 2. Máscara de água para "carvar" o mar e a baía por cima do arco-íris
+      // 2. Máscara de água com mar animado (gradientes em movimento)
       map.addSource("agua", { type: "geojson", data: agua });
       map.addLayer({
         id: "agua-fill",
         type: "fill",
         source: "agua",
-        paint: { "fill-color": "#dbeafe" },
+        paint: { "fill-pattern": "mar-anim" },
       });
 
       // 3. Municípios da Bahia
@@ -406,6 +500,7 @@ export function BahiaMap({ indices, municipios }: BahiaMapProps) {
     });
 
     return () => {
+      if (intervaloMar !== undefined) window.clearInterval(intervaloMar);
       map.remove();
       mapRef.current = null;
     };
