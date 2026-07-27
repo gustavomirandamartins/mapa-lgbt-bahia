@@ -34,6 +34,10 @@ const ESTILO_LOCAL: StyleSpecification = {
 
 const ROSA_CHOQUE = "#ff1493";
 
+/** Cor da terra fora da Bahia (rosa escuro liso; o gradiente para chumbo nas
+ *  extremidades vem da vinheta estática em app/page.tsx). */
+const COR_TERRA = "#5e2136";
+
 /** Gerador de número pseudo-aleatório determinístico (seed fixo). */
 function criarPrng(seed = 123456789) {
   return function () {
@@ -42,76 +46,6 @@ function criarPrng(seed = 123456789) {
     t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
     return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
   };
-}
-
-/**
- * Cria uma textura de relevo terrestre em tom de rosa escuro com linhas de
- * contorno e notas de rosa choque. As extremidades escurecem para chumbo via
- * vinheta estática aplicada sobre o mapa (app/page.tsx). Sem emendas.
- */
-function criarTexturaTerra(tamanho = 128): ImageData {
-  const canvas = document.createElement("canvas");
-  canvas.width = tamanho;
-  canvas.height = tamanho;
-  const ctx = canvas.getContext("2d");
-  if (!ctx) throw new Error("Não foi possível criar o contexto 2D");
-  const c = ctx;
-
-  const prng = criarPrng(1969);
-
-  // Base rosa escuro
-  c.fillStyle = "#5e2136";
-  c.fillRect(0, 0, tamanho, tamanho);
-
-  // Linhas de contorno / relevo em variações do rosa escuro (período divisível
-  // pelo tamanho para manter o padrão sem emendas)
-  c.lineWidth = 0.7;
-  for (let i = 0; i < 10; i++) {
-    const periodo = tamanho / (1 + Math.floor(prng() * 4));
-    const amplitude = 3 + prng() * 7;
-    const fase = prng() * Math.PI * 2;
-    const yOffset = prng() * tamanho;
-    const claro = prng() > 0.5;
-    c.strokeStyle = claro ? "rgba(148,63,96,0.6)" : "rgba(70,20,42,0.6)";
-    c.beginPath();
-    for (let x = 0; x <= tamanho + 1; x++) {
-      const y = yOffset + amplitude * Math.sin((2 * Math.PI * x) / periodo + fase);
-      if (x === 0) c.moveTo(x, y);
-      else c.lineTo(x, y);
-    }
-    c.stroke();
-  }
-
-  // Notas de rosa choque — pontos e traços pequenos, duplicados nas bordas
-  c.fillStyle = ROSA_CHOQUE;
-  c.strokeStyle = ROSA_CHOQUE;
-  function desenharNota(x: number, y: number) {
-    const tamanhoNota = 0.5 + prng() * 1.1;
-    const forma = prng();
-    if (forma < 0.5) {
-      c.beginPath();
-      c.arc(x, y, tamanhoNota, 0, Math.PI * 2);
-      c.fill();
-    } else {
-      c.lineWidth = 1;
-      c.beginPath();
-      c.moveTo(x, y);
-      c.lineTo(x + (prng() - 0.5) * 4, y + (prng() - 0.5) * 4);
-      c.stroke();
-    }
-  }
-  for (let i = 0; i < 26; i++) {
-    const x = prng() * tamanho;
-    const y = prng() * tamanho;
-    const dx = x > tamanho - 4 ? x - tamanho : x < 4 ? x + tamanho : 0;
-    const dy = y > tamanho - 4 ? y - tamanho : y < 4 ? y + tamanho : 0;
-    desenharNota(x, y);
-    if (dx) desenharNota(dx, y);
-    if (dy) desenharNota(x, dy);
-    if (dx && dy) desenharNota(dx, dy);
-  }
-
-  return ctx.getImageData(0, 0, tamanho, tamanho);
 }
 
 // ----------------------------------------------------------------------------
@@ -262,10 +196,6 @@ export function BahiaMap({ indices, municipios }: BahiaMapProps) {
     let intervaloMar: number | undefined;
 
     map.on("load", async () => {
-      // Padrão de relevo terrestre (rosa escuro + rosa choque)
-      const textura = criarTexturaTerra();
-      map.addImage("terra-texture", textura, { pixelRatio: 1 });
-
       // Mar animado: registra o primeiro frame e agenda atualizações
       if (ctxMar) {
         desenharMar(ctxMar, 0, tamanhoMar, bolhasMar);
@@ -306,16 +236,13 @@ export function BahiaMap({ indices, municipios }: BahiaMapProps) {
         corPreenchimento = expressao;
       }
 
-      // 1. Terra de fundo (relevo cinza escuro + rosa choque) — fora da Bahia
+      // 1. Terra de fundo (rosa escuro liso) — fora da Bahia
       map.addSource("terra", { type: "geojson", data: terra });
       map.addLayer({
         id: "terra-fill",
         type: "fill",
         source: "terra",
-        paint: {
-          "fill-pattern": "terra-texture",
-          "fill-opacity": 1,
-        },
+        paint: { "fill-color": COR_TERRA },
       });
 
       // 2. Máscara de água com mar animado (gradientes em movimento)

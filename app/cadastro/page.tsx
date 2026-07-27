@@ -5,6 +5,7 @@ import { ArrowLeft } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { CadastroForm } from "@/components/cadastro-form";
 import { PrideLogo } from "@/components/pride-logo";
+import { AuroraCard } from "@/components/ui/aurora-card";
 import type { Municipio } from "@/lib/auth-guards";
 
 export const metadata: Metadata = { title: "Cadastro de Município" };
@@ -21,7 +22,10 @@ export default async function CadastroPage() {
 
   return (
     <main className="app-backdrop flex min-h-dvh flex-col items-center justify-center px-4 py-10">
-      <div className="glass-strong w-full max-w-md rounded-[2rem] p-8">
+      <AuroraCard
+        className="w-full max-w-md rounded-[2rem]"
+        innerClassName="glass-strong rounded-[2rem] p-8"
+      >
         <div className="mb-8 flex flex-col items-center text-center">
           <PrideLogo size={56} />
           <h1 className="mt-4 text-2xl font-bold tracking-tight">
@@ -41,7 +45,7 @@ export default async function CadastroPage() {
             Entrar
           </Link>
         </p>
-      </div>
+      </AuroraCard>
 
       <Link
         href="/"

@@ -6,6 +6,7 @@ import { LogIn, Mail, Lock, ArrowLeft } from "lucide-react";
 
 import { login, type AuthFormState } from "@/lib/actions/auth";
 import { PrideLogo } from "@/components/pride-logo";
+import { AuroraCard } from "@/components/ui/aurora-card";
 
 const initialState: AuthFormState = { error: null };
 
@@ -14,7 +15,10 @@ export default function LoginPage() {
 
   return (
     <main className="app-backdrop flex min-h-dvh flex-col items-center justify-center px-4 py-10">
-      <div className="glass-strong w-full max-w-md rounded-[2rem] p-8">
+      <AuroraCard
+        className="w-full max-w-md rounded-[2rem]"
+        innerClassName="glass-strong rounded-[2rem] p-8"
+      >
         <div className="mb-8 flex flex-col items-center text-center">
           <PrideLogo size={56} />
           <h1 className="mt-4 text-2xl font-bold tracking-tight">
@@ -72,7 +76,7 @@ export default function LoginPage() {
             Solicite acesso
           </Link>
         </p>
-      </div>
+      </AuroraCard>
 
       <Link
         href="/"
