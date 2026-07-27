@@ -32,37 +32,86 @@ const ESTILO_LOCAL: StyleSpecification = {
   ],
 };
 
-/** Cores suaves do arco-íris para o padrão de fundo (muted pride). */
-const PRIDE_COLORS = [
-  "#e57373", // vermelho
-  "#ffb74d", // laranja
-  "#fff176", // amarelo
-  "#81c784", // verde
-  "#64b5f6", // azul
-  "#ba68c8", // roxo
-  "#f06292", // rosa
-];
+const ROSA_CHOQUE = "#ff1493";
 
-/** Cria um padrão de arco-íris horizontal fino e sem emendas para fill-pattern. */
-function criarTexturaArcoIris(tamanho = 128): ImageData {
+/** Gerador de número pseudo-aleatório determinístico (seed fixo). */
+function criarPrng(seed = 123456789) {
+  return function () {
+    let t = (seed += 0x6d2b79f5);
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+/**
+ * Cria uma textura de relevo terrestre: cinza escuro com sombreamento
+ * topográfico e notas de rosa choque. Padrão 100% sem emendas.
+ */
+function criarTexturaTerra(tamanho = 128): ImageData {
   const canvas = document.createElement("canvas");
   canvas.width = tamanho;
   canvas.height = tamanho;
   const ctx = canvas.getContext("2d");
   if (!ctx) throw new Error("Não foi possível criar o contexto 2D");
+  const c = ctx;
 
-  const totalFaixas = PRIDE_COLORS.length * 4;
-  const alturaFaixa = tamanho / totalFaixas;
+  const prng = criarPrng(1969);
 
-  // Faixas horizontais sem emendas
-  for (let i = 0; i < totalFaixas; i++) {
-    ctx.fillStyle = PRIDE_COLORS[i % PRIDE_COLORS.length];
-    ctx.fillRect(0, i * alturaFaixa, tamanho, alturaFaixa + 0.5);
+  // Base cinza escuro
+  c.fillStyle = "#4a4a4a";
+  c.fillRect(0, 0, tamanho, tamanho);
+
+  // Linhas de contorno / relevo em tons de cinza (sempre com período divisível
+  // pelo tamanho para manter o padrão sem emendas)
+  c.lineWidth = 0.7;
+  for (let i = 0; i < 10; i++) {
+    const periodo = tamanho / (1 + Math.floor(prng() * 4));
+    const amplitude = 3 + prng() * 7;
+    const fase = prng() * Math.PI * 2;
+    const yOffset = prng() * tamanho;
+    const clareza = prng() > 0.5 ? 0.07 : -0.05;
+    const base = 74;
+    const valor = Math.max(0, Math.min(255, base + clareza * 255));
+    c.strokeStyle = `rgb(${valor},${valor},${valor})`;
+    c.beginPath();
+    for (let x = 0; x <= tamanho + 1; x++) {
+      const y = yOffset + amplitude * Math.sin((2 * Math.PI * x) / periodo + fase);
+      if (x === 0) c.moveTo(x, y);
+      else c.lineTo(x, y);
+    }
+    c.stroke();
   }
 
-  // Camada branca semi-transparente para suavizar as cores (efeito "muted")
-  ctx.fillStyle = "rgba(255, 255, 255, 0.45)";
-  ctx.fillRect(0, 0, tamanho, tamanho);
+  // Notas de rosa choque — pontos e traços pequenos, duplicados nas bordas para
+  // evitar emendas visíveis
+  c.fillStyle = ROSA_CHOQUE;
+  c.strokeStyle = ROSA_CHOQUE;
+  function desenharNota(x: number, y: number) {
+    const tamanhoNota = 0.5 + prng() * 1.1;
+    const forma = prng();
+    if (forma < 0.5) {
+      c.beginPath();
+      c.arc(x, y, tamanhoNota, 0, Math.PI * 2);
+      c.fill();
+    } else {
+      c.lineWidth = 1;
+      c.beginPath();
+      c.moveTo(x, y);
+      c.lineTo(x + (prng() - 0.5) * 4, y + (prng() - 0.5) * 4);
+      c.stroke();
+    }
+  }
+  for (let i = 0; i < 30; i++) {
+    const x = prng() * tamanho;
+    const y = prng() * tamanho;
+    const dx = x > tamanho - 4 ? x - tamanho : x < 4 ? x + tamanho : 0;
+    const dy = y > tamanho - 4 ? y - tamanho : y < 4 ? y + tamanho : 0;
+    desenharNota(x, y);
+    if (dx) desenharNota(dx, y);
+    if (dy) desenharNota(x, dy);
+    if (dx && dy) desenharNota(dx, dy);
+  }
 
   return ctx.getImageData(0, 0, tamanho, tamanho);
 }
@@ -128,7 +177,7 @@ export function BahiaMap({ indices, municipios }: BahiaMapProps) {
 
     map.addControl(
       new NavigationControl({ showCompass: false }),
-      "top-right"
+      "bottom-right"
     );
 
     map.on("error", (event) => {
@@ -137,9 +186,9 @@ export function BahiaMap({ indices, municipios }: BahiaMapProps) {
     });
 
     map.on("load", async () => {
-      // Padrão de arco-íris como fill-pattern
-      const textura = criarTexturaArcoIris();
-      map.addImage("rainbow", textura, { pixelRatio: 1 });
+      // Padrão de relevo terrestre (cinza escuro + rosa choque)
+      const textura = criarTexturaTerra();
+      map.addImage("terra-texture", textura, { pixelRatio: 1 });
 
       const [terra, agua, geojson, contorno] = await Promise.all([
         fetch("/geo/terra.geojson").then((r) => r.json()),
@@ -163,15 +212,15 @@ export function BahiaMap({ indices, municipios }: BahiaMapProps) {
         corPreenchimento = expressao;
       }
 
-      // 1. Terra de fundo (arco-íris suave) — visível fora da Bahia
+      // 1. Terra de fundo (relevo cinza escuro + rosa choque) — fora da Bahia
       map.addSource("terra", { type: "geojson", data: terra });
       map.addLayer({
         id: "terra-fill",
         type: "fill",
         source: "terra",
         paint: {
-          "fill-pattern": "rainbow",
-          "fill-opacity": 0.16,
+          "fill-pattern": "terra-texture",
+          "fill-opacity": 1,
         },
       });
 
@@ -205,6 +254,31 @@ export function BahiaMap({ indices, municipios }: BahiaMapProps) {
           ],
         },
       });
+
+      // 3.1 Glow rosa choque para municípios de referência (81–100)
+      const idsReferencia = indices
+        .filter((i) => i.nota_final >= 81)
+        .map((i) => i.municipio_id);
+      if (idsReferencia.length > 0) {
+        const filtroGlow: unknown[] = [
+          "match",
+          ["to-number", ["get", "codarea"]],
+        ];
+        for (const id of idsReferencia) filtroGlow.push(id, true);
+        filtroGlow.push(false);
+        map.addLayer({
+          id: "municipios-glow",
+          type: "line",
+          source: "municipios",
+          filter: filtroGlow as never,
+          paint: {
+            "line-color": ROSA_CHOQUE,
+            "line-width": 4,
+            "line-blur": 3,
+            "line-opacity": 0.85,
+          },
+        });
+      }
 
       map.addLayer({
         id: "municipios-line",

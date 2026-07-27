@@ -29,7 +29,7 @@ function formatarData(iso: string): string {
 export function MunicipioCard({ nome, indice, onClose }: MunicipioCardProps) {
   return (
     <div className="animate-sheet-up pointer-events-auto fixed inset-x-3 bottom-3 z-30 mx-auto max-w-md sm:inset-x-auto sm:right-5 sm:bottom-5 sm:w-96">
-      <div className="glass-strong max-h-[72dvh] overflow-y-auto rounded-[1.75rem] p-5">
+      <div className="glass-strong max-h-[72dvh] overflow-y-auto rounded-[1.75rem] p-5 shadow-[0_0_24px_-6px_rgba(255,20,147,0.35)] ring-1 ring-[#ff1493]/10 transition-all duration-300 hover:shadow-[0_0_36px_-3px_rgba(255,20,147,0.65)] hover:ring-[#ff1493]/30">
         <div className="mb-3 flex items-start justify-between gap-3">
           <div>
             <p className="text-[11px] font-semibold tracking-widest text-neutral-400 uppercase">

@@ -46,7 +46,7 @@ export default async function HomePage() {
       {/* Legenda compacta (mobile): barra de faixas no rodapé */}
       <div className="glass pointer-events-none fixed bottom-3 left-3 z-20 flex items-center gap-1.5 rounded-full px-3 py-2 sm:hidden">
         <span className="text-[10px] font-bold text-neutral-500">0</span>
-        <span className="h-2 w-24 rounded-full bg-gradient-to-r from-red-500 via-yellow-400 to-violet-500" />
+        <span className="h-2 w-24 rounded-full bg-[linear-gradient(to_right,#3b82f6,#22c55e,#facc15,#f97316,#ef4444)]" />
         <span className="text-[10px] font-bold text-neutral-500">100</span>
       </div>
     </main>
