@@ -112,7 +112,7 @@ export function QuestionnaireWizard({ nomeMunicipio }: { nomeMunicipio: string }
       {/* Eixo atual */}
       <div className="mb-5 flex items-center justify-between gap-3">
         <div>
-          <p className="text-[11px] font-bold tracking-widest text-violet-500 uppercase">
+          <p className="text-[11px] font-bold tracking-widest text-neutral-400 uppercase">
             Eixo {etapa + 1} de {IDT_QUESTIONARIO.length}
           </p>
           <h1 className="text-xl font-bold tracking-tight sm:text-2xl">
@@ -159,7 +159,7 @@ export function QuestionnaireWizard({ nomeMunicipio }: { nomeMunicipio: string }
                       }
                       className={`rounded-xl border px-4 py-3 text-left text-sm font-medium transition-all active:scale-[0.99] ${
                         selecionada
-                          ? "border-violet-400 bg-violet-500/15 text-violet-900 shadow-sm"
+                          ? "border-neutral-400 bg-neutral-900/10 text-neutral-900 shadow-sm"
                           : "border-white/60 bg-white/40 text-neutral-600 hover:bg-white/70"
                       }`}
                       aria-pressed={selecionada}

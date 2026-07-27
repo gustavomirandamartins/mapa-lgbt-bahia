@@ -103,7 +103,7 @@ export function MunicipioCard({ nome, indice, onClose }: MunicipioCardProps) {
                   </p>
                   <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-neutral-200/70">
                     <div
-                      className="h-full rounded-full bg-violet-500"
+                      className="h-full rounded-full bg-sky-500"
                       style={{ width: `${eixo.percentual}%` }}
                     />
                   </div>

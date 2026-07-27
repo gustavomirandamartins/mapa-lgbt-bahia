@@ -84,7 +84,7 @@ export default async function AdminPage() {
         {/* Cadastros pendentes */}
         <section className="glass rounded-[2rem] p-6">
           <h2 className="mb-4 flex items-center gap-2 text-sm font-bold tracking-tight">
-            <Users className="size-4 text-violet-600" aria-hidden />
+            <Users className="size-4 text-neutral-500" aria-hidden />
             Cadastros aguardando aprovação
             <span className="glass-soft rounded-full px-2 py-0.5 text-xs font-bold text-neutral-500">
               {perfisPendentes.length}
@@ -123,7 +123,7 @@ export default async function AdminPage() {
         {/* Avaliações pendentes */}
         <section className="glass rounded-[2rem] p-6">
           <h2 className="mb-4 flex items-center gap-2 text-sm font-bold tracking-tight">
-            <ClipboardCheck className="size-4 text-violet-600" aria-hidden />
+            <ClipboardCheck className="size-4 text-neutral-500" aria-hidden />
             Avaliações aguardando revisão
             <span className="glass-soft rounded-full px-2 py-0.5 text-xs font-bold text-neutral-500">
               {avaliacoesPendentes.length}

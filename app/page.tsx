@@ -55,7 +55,7 @@ export default async function HomePage() {
             href="/login"
             className="flex items-center gap-2 rounded-full px-4 py-2.5 text-xs font-bold text-neutral-700 transition-transform active:scale-95 sm:text-sm"
           >
-            <ShieldCheck className="size-4 text-violet-600" aria-hidden />
+            <ShieldCheck className="size-4 text-neutral-500" aria-hidden />
             Central de Controle
           </Link>
         </AuroraCard>

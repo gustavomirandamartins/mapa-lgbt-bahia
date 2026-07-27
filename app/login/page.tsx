@@ -72,7 +72,7 @@ export default function LoginPage() {
 
         <p className="mt-6 text-center text-sm text-neutral-500">
           Gestor municipal?{" "}
-          <Link href="/cadastro" className="font-semibold text-violet-600">
+          <Link href="/cadastro" className="font-semibold text-neutral-700">
             Solicite acesso
           </Link>
         </p>

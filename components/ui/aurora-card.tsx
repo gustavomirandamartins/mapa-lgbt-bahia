@@ -20,8 +20,8 @@ interface AuroraCardProps extends HTMLAttributes<HTMLDivElement> {
 }
 
 /**
- * Card com borda em gradiente e brilho aurora rosa-choque que segue o mouse.
- * Adaptado do padrão AuroraCard para a estética clara (glass) do projeto.
+ * Card estilo "Liquid Glass": borda de vidro branca e brilho luminoso neutro
+ * que segue o mouse. Adaptado do padrão AuroraCard para a estética do projeto.
  */
 export const AuroraCard = forwardRef<HTMLDivElement, AuroraCardProps>(
   ({ className, innerClassName, children, ...props }, ref) => {
@@ -42,19 +42,19 @@ export const AuroraCard = forwardRef<HTMLDivElement, AuroraCardProps>(
         ref={ref}
         onMouseMove={handleMouseMove}
         className={cn(
-          "group relative overflow-hidden bg-gradient-to-r from-fuchsia-500/70 via-pink-500/70 to-violet-500/70 p-[1.5px]",
-          "shadow-[0_0_18px_-6px_rgba(255,20,147,0.35)] transition-shadow duration-300 hover:shadow-[0_0_32px_-4px_rgba(255,20,147,0.6)]",
+          "group relative overflow-hidden bg-gradient-to-r from-white/80 via-white/40 to-white/80 p-[1px]",
+          "shadow-[0_10px_30px_-12px_rgba(31,41,55,0.25)] transition-shadow duration-300 hover:shadow-[0_16px_44px_-10px_rgba(31,41,55,0.32)]",
           className
         )}
         {...props}
       >
-        {/* Brilho aurora que segue o cursor */}
+        {/* Brilho luminoso neutro que segue o cursor */}
         <div
           aria-hidden
           className="pointer-events-none absolute inset-0 z-0 opacity-0 transition-opacity duration-500 group-hover:opacity-100"
           style={{
             background:
-              "radial-gradient(220px circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(255,20,147,0.28), transparent 75%)",
+              "radial-gradient(220px circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(255,255,255,0.45), transparent 75%)",
           }}
         />
         <div className={cn("relative z-10", innerClassName)}>{children}</div>

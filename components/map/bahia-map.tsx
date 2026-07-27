@@ -32,7 +32,7 @@ const ESTILO_LOCAL: StyleSpecification = {
   ],
 };
 
-const ROSA_CHOQUE = "#ff1493";
+const COR_GLOW = "#ef4444";
 
 /** Cor da terra fora da Bahia (rosa escuro liso; o gradiente para chumbo nas
  *  extremidades vem da vinheta estática em app/page.tsx). */
@@ -293,7 +293,7 @@ export function BahiaMap({ indices, municipios }: BahiaMapProps) {
           source: "municipios",
           filter: filtroGlow as never,
           paint: {
-            "line-color": ROSA_CHOQUE,
+            "line-color": COR_GLOW,
             "line-width": 4,
             "line-blur": 3,
             "line-opacity": 0.85,
