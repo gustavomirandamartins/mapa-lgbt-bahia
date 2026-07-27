@@ -110,8 +110,9 @@ body {
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
-    /* Sombra suave sob o texto degradê */
-    filter: drop-shadow(0 2px 6px rgb(28 28 30 / 0.3));
+    /* Traçado preto fino ao redor do texto degradê */
+    -webkit-text-stroke: 0.6px rgb(0 0 0 / 0.9);
+    paint-order: stroke fill;
   }
 }
 

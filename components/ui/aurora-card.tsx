@@ -43,7 +43,7 @@ export const AuroraCard = forwardRef<HTMLDivElement, AuroraCardProps>(
         onMouseMove={handleMouseMove}
         className={cn(
           "group relative overflow-hidden bg-gradient-to-r from-white/80 via-white/40 to-white/80 p-[1px]",
-          "shadow-[0_10px_30px_-12px_rgba(31,41,55,0.25)] transition-shadow duration-300 hover:shadow-[0_16px_44px_-10px_rgba(31,41,55,0.32)]",
+          "shadow-[0_0_18px_2px_rgba(255,255,255,0.45)] transition-shadow duration-300 hover:shadow-[0_0_30px_4px_rgba(255,255,255,0.65)]",
           className
         )}
         {...props}

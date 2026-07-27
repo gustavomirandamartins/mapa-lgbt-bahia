@@ -34,9 +34,9 @@ const ESTILO_LOCAL: StyleSpecification = {
 
 const COR_GLOW = "#ef4444";
 
-/** Cor da terra fora da Bahia (rosa escuro liso; o gradiente para chumbo nas
+/** Cor da terra fora da Bahia (rosa choque liso; o gradiente para preto nas
  *  extremidades vem da vinheta estática em app/page.tsx). */
-const COR_TERRA = "#5e2136";
+const COR_TERRA = "#ff1493";
 
 /** Gerador de número pseudo-aleatório determinístico (seed fixo). */
 function criarPrng(seed = 123456789) {
@@ -312,8 +312,19 @@ export function BahiaMap({ indices, municipios }: BahiaMapProps) {
         },
       });
 
-      // 4. Contorno do estado
+      // 4. Contorno do estado com glow
       map.addSource("contorno", { type: "geojson", data: contorno });
+      map.addLayer({
+        id: "contorno-glow",
+        type: "line",
+        source: "contorno",
+        paint: {
+          "line-color": "#ffffff",
+          "line-width": 8,
+          "line-blur": 7,
+          "line-opacity": 0.75,
+        },
+      });
       map.addLayer({
         id: "contorno-line",
         type: "line",

@@ -19,14 +19,14 @@ export default async function HomePage() {
     <main className="relative h-dvh w-full overflow-hidden">
       <BahiaMap indices={indices} municipios={municipios} />
 
-      {/* Vinheta estática: chumbo nas extremidades → revela o rosa escuro da
-          terra no centro (efeito de gradiente sobre o relevo terrestre). */}
+      {/* Vinheta estática: preto nas extremidades → rosa choque no centro
+          (gradiente do território fora da Bahia). */}
       <div
         aria-hidden
         className="pointer-events-none fixed inset-0 z-10"
         style={{
           background:
-            "radial-gradient(ellipse at 50% 45%, transparent 42%, rgba(31,41,55,0.5) 100%)",
+            "radial-gradient(ellipse at 50% 45%, transparent 40%, rgba(0,0,0,0.82) 100%)",
         }}
       />
 
