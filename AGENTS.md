@@ -47,9 +47,12 @@ npm run lint   # eslint
 - **Auth/perfis**: signup cria `profiles` via trigger `handle_new_user`
   (metadados `nome`, `municipio_id`). Guards server-side em
   `lib/auth-guards.ts` (`requireUser`, `requireAdmin`).
-- **RLS**: a tabela `avaliacoes` é fechada para anon; o mapa público lê
-  **apenas a view `indice_publico`** (avaliações aprovadas). Policies em
-  `supabase/migrations/0002_policies.sql`.
+- **RLS**: a tabela `avaliacoes` é acessível a anon apenas para avaliações
+  aprovadas (policy em `0004`) e somente nas colunas públicas (`municipio_id`,
+  `nota_final`, `classificacao`, `notas_eixos`, `submitted_at`, `status`).
+  O mapa público lê a view `indice_publico`, criada com
+  `security_invoker = true` para respeitar a RLS do invocador. Policies em
+  `supabase/migrations/0002_policies.sql` e `0004_view_security_invoker.sql`.
 - **Fluxo de aprovação**: perfil `pendente` → admin aprova → gestor responde
   questionário → avaliação `pendente` → admin aprova → publicada no mapa
   (versão anterior vira `substituida`).
@@ -66,7 +69,7 @@ npm run lint   # eslint
    ⚠️ A URL é **apenas** `https://<ref>.supabase.co` — **sem** `/rest/v1/`
    no final (a página de Data API do dashboard exibe o endpoint completo;
    copiar com o caminho quebra todas as chamadas com PGRST125).
-3. Rodar as migrations `supabase/migrations/0001..0003` no SQL Editor
+3. Rodar as migrations `supabase/migrations/0001..0004` no SQL Editor
    (ou `supabase db push`).
 4. Bootstrap do primeiro admin: criar o usuário em Authentication e rodar o
    `update` indicado no comentário final de `0001_schema.sql`.

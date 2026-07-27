@@ -27,10 +27,45 @@ const ESTILO_LOCAL: StyleSpecification = {
     {
       id: "background",
       type: "background",
-      paint: { "background-color": "#f6f7fb" },
+      paint: { "background-color": "#dbeafe" },
     },
   ],
 };
+
+/** Cores suaves do arco-íris para o padrão de fundo (muted pride). */
+const PRIDE_COLORS = [
+  "#e57373", // vermelho
+  "#ffb74d", // laranja
+  "#fff176", // amarelo
+  "#81c784", // verde
+  "#64b5f6", // azul
+  "#ba68c8", // roxo
+  "#f06292", // rosa
+];
+
+/** Cria um padrão de arco-íris horizontal fino e sem emendas para fill-pattern. */
+function criarTexturaArcoIris(tamanho = 128): ImageData {
+  const canvas = document.createElement("canvas");
+  canvas.width = tamanho;
+  canvas.height = tamanho;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) throw new Error("Não foi possível criar o contexto 2D");
+
+  const totalFaixas = PRIDE_COLORS.length * 4;
+  const alturaFaixa = tamanho / totalFaixas;
+
+  // Faixas horizontais sem emendas
+  for (let i = 0; i < totalFaixas; i++) {
+    ctx.fillStyle = PRIDE_COLORS[i % PRIDE_COLORS.length];
+    ctx.fillRect(0, i * alturaFaixa, tamanho, alturaFaixa + 0.5);
+  }
+
+  // Camada branca semi-transparente para suavizar as cores (efeito "muted")
+  ctx.fillStyle = "rgba(255, 255, 255, 0.45)";
+  ctx.fillRect(0, 0, tamanho, tamanho);
+
+  return ctx.getImageData(0, 0, tamanho, tamanho);
+}
 
 /** Bounding box do estado da Bahia. */
 const BAHIA_BOUNDS: [[number, number], [number, number]] = [
@@ -102,8 +137,16 @@ export function BahiaMap({ indices, municipios }: BahiaMapProps) {
     });
 
     map.on("load", async () => {
-      const resposta = await fetch("/geo/bahia-municipios.geojson");
-      const geojson = await resposta.json();
+      // Padrão de arco-íris como fill-pattern
+      const textura = criarTexturaArcoIris();
+      map.addImage("rainbow", textura, { pixelRatio: 1 });
+
+      const [terra, agua, geojson, contorno] = await Promise.all([
+        fetch("/geo/terra.geojson").then((r) => r.json()),
+        fetch("/geo/agua.geojson").then((r) => r.json()),
+        fetch("/geo/bahia-municipios.geojson").then((r) => r.json()),
+        fetch("/geo/bahia-contorno.geojson").then((r) => r.json()),
+      ]);
 
       // Expressão de cor: codarea (string) -> número -> cor da faixa do IDT.
       // Com zero avaliações, usa cor única (match sem ramos é inválido).
@@ -120,6 +163,28 @@ export function BahiaMap({ indices, municipios }: BahiaMapProps) {
         corPreenchimento = expressao;
       }
 
+      // 1. Terra de fundo (arco-íris suave) — visível fora da Bahia
+      map.addSource("terra", { type: "geojson", data: terra });
+      map.addLayer({
+        id: "terra-fill",
+        type: "fill",
+        source: "terra",
+        paint: {
+          "fill-pattern": "rainbow",
+          "fill-opacity": 0.16,
+        },
+      });
+
+      // 2. Máscara de água para "carvar" o mar e a baía por cima do arco-íris
+      map.addSource("agua", { type: "geojson", data: agua });
+      map.addLayer({
+        id: "agua-fill",
+        type: "fill",
+        source: "agua",
+        paint: { "fill-color": "#dbeafe" },
+      });
+
+      // 3. Municípios da Bahia
       map.addSource("municipios", {
         type: "geojson",
         data: geojson,
@@ -136,7 +201,7 @@ export function BahiaMap({ indices, municipios }: BahiaMapProps) {
             "case",
             ["boolean", ["feature-state", "hover"], false],
             1,
-            0.9,
+            0.92,
           ],
         },
       });
@@ -152,7 +217,20 @@ export function BahiaMap({ indices, municipios }: BahiaMapProps) {
         },
       });
 
-      // Contorno de destaque do município selecionado
+      // 4. Contorno do estado
+      map.addSource("contorno", { type: "geojson", data: contorno });
+      map.addLayer({
+        id: "contorno-line",
+        type: "line",
+        source: "contorno",
+        paint: {
+          "line-color": "#3b5f8a",
+          "line-width": 2.2,
+          "line-opacity": 0.8,
+        },
+      });
+
+      // 5. Contorno de destaque do município selecionado
       map.addLayer({
         id: "municipios-selecionado",
         type: "line",
@@ -164,7 +242,7 @@ export function BahiaMap({ indices, municipios }: BahiaMapProps) {
         },
       });
 
-      // Rótulos dos municípios (aparecem conforme o zoom)
+      // 6. Rótulos dos municípios (aparecem conforme o zoom)
       map.addLayer({
         id: "municipios-label",
         type: "symbol",
@@ -265,8 +343,8 @@ export function BahiaMap({ indices, municipios }: BahiaMapProps) {
     : null;
   const nomeSelecionado = selecao
     ? (indicesPorMunicipio.get(selecao.municipioId)?.nome ??
-      nomesPorMunicipio.get(selecao.municipioId) ??
-      "Município")
+       nomesPorMunicipio.get(selecao.municipioId) ??
+       "Município")
     : "";
 
   return (
