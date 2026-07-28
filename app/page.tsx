@@ -5,7 +5,6 @@ import { getIndicesPublicos, getMunicipios } from "@/lib/public-data";
 import { BahiaMap } from "@/components/map/bahia-map";
 import { MapLegend } from "@/components/map/map-legend";
 import { PrideLogo } from "@/components/pride-logo";
-import { AuroraCard } from "@/components/ui/aurora-card";
 
 export const revalidate = 60;
 
@@ -16,58 +15,41 @@ export default async function HomePage() {
   ]);
 
   return (
-    <main className="relative h-dvh w-full overflow-hidden">
+    <main className="relative h-dvh w-full overflow-hidden bg-[#eef1f7]">
       <BahiaMap indices={indices} municipios={municipios} />
 
-      {/* Vinheta estática: preto nas extremidades → rosa choque no centro
-          (gradiente do território fora da Bahia). */}
-      <div
-        aria-hidden
-        className="pointer-events-none fixed inset-0 z-10"
-        style={{
-          background:
-            "radial-gradient(ellipse at 50% 45%, transparent 40%, rgba(0,0,0,0.82) 100%)",
-        }}
-      />
-
-      {/* Header flutuante */}
-      <header className="pointer-events-none fixed inset-x-3 top-3 z-20 flex items-start justify-between gap-3 sm:inset-x-5 sm:top-5">
-        <AuroraCard
-          className="pointer-events-auto rounded-3xl"
-          innerClassName="glass flex items-center gap-3 rounded-3xl px-4 py-3"
-        >
-          <PrideLogo size={42} />
+      {/* Header flutuante em relevo Neumórfico (Soft UI 3D) */}
+      <header className="pointer-events-none fixed inset-x-3 top-3 z-20 flex items-start justify-between gap-3 sm:inset-x-6 sm:top-6">
+        <div className="pointer-events-auto neuro-card flex items-center gap-3.5 rounded-3xl px-5 py-3.5">
+          <PrideLogo size={46} />
           <div>
-            <h1 className="text-lg leading-tight font-extrabold tracking-tight sm:text-xl">
+            <h1 className="text-lg leading-tight font-extrabold tracking-tight text-[#2c3444] sm:text-xl">
               Turismo <span className="pride-text">LGBTQIAPN+</span> · Bahia
             </h1>
-            <p className="text-[10px] leading-tight font-medium text-neutral-500 sm:text-[11px]">
+            <p className="text-[11px] leading-tight font-semibold text-[#64748b] sm:text-xs">
               Índice de Desenvolvimento do Turismo LGBT (IDT-LGBT)
             </p>
           </div>
-        </AuroraCard>
+        </div>
 
-        <AuroraCard
-          className="pointer-events-auto rounded-full"
-          innerClassName="glass-strong rounded-full"
+        <Link
+          href="/login"
+          className="pointer-events-auto neuro-pill flex items-center gap-2.5 rounded-full px-5 py-3 text-xs font-bold text-[#2c3444] transition-transform active:scale-95 sm:text-sm"
         >
-          <Link
-            href="/login"
-            className="flex items-center gap-2 rounded-full px-4 py-2.5 text-xs font-bold text-neutral-700 transition-transform active:scale-95 sm:text-sm"
-          >
-            <ShieldCheck className="size-4 text-neutral-500" aria-hidden />
-            Central de Controle
-          </Link>
-        </AuroraCard>
+          <span className="flex size-6 items-center justify-center rounded-full bg-[#eef1f7] shadow-[inset_-2px_-2px_4px_rgba(255,255,255,0.9),inset_2px_2px_4px_rgba(178,190,214,0.45)]">
+            <ShieldCheck className="size-3.5 text-[#8b5cf6]" aria-hidden />
+          </span>
+          Central de Controle
+        </Link>
       </header>
 
       <MapLegend avaliados={indices.length} total={municipios.length || 417} />
 
       {/* Legenda compacta (mobile): barra de faixas no rodapé */}
-      <div className="glass pointer-events-none fixed bottom-3 left-3 z-20 flex items-center gap-1.5 rounded-full px-3 py-2 sm:hidden">
-        <span className="text-[10px] font-bold text-neutral-500">0</span>
-        <span className="h-2 w-24 rounded-full bg-[linear-gradient(to_right,#3b82f6,#22c55e,#facc15,#f97316,#ef4444)]" />
-        <span className="text-[10px] font-bold text-neutral-500">100</span>
+      <div className="neuro-card pointer-events-none fixed bottom-3 left-3 z-20 flex items-center gap-2 rounded-full px-4 py-2 sm:hidden">
+        <span className="text-[10px] font-bold text-[#64748b]">0</span>
+        <span className="h-2.5 w-24 rounded-full bg-[linear-gradient(to_right,#96c8f2,#8fe5d0,#fcd2b1,#f8ac7a,#f7a1c2)] shadow-[inset_1px_1px_2px_rgba(0,0,0,0.15)]" />
+        <span className="text-[10px] font-bold text-[#64748b]">100</span>
       </div>
     </main>
   );

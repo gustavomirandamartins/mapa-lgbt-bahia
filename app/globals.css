@@ -8,12 +8,13 @@
   --color-pride-blue: #0a84ff;
   --color-pride-purple: #bf5af2;
 
-  --color-band-inexistente: #ef4444;
-  --color-band-sensibilizado: #f97316;
-  --color-band-estruturante: #eab308;
-  --color-band-consolidado: #22c55e;
-  --color-band-referencia: #8b5cf6;
-  --color-band-sem-dados: #cbd5e1;
+  /* Paleta Pastel Arco-Íris (Neumorphism Soft UI) */
+  --color-band-inexistente: #96c8f2;
+  --color-band-sensibilizado: #8fe5d0;
+  --color-band-estruturante: #fcd2b1;
+  --color-band-consolidado: #f8ac7a;
+  --color-band-referencia: #f7a1c2;
+  --color-band-sem-dados: #c7beeb;
 
   --font-sans: var(--font-geist-sans), -apple-system, BlinkMacSystemFont,
     "SF Pro Display", "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
@@ -21,7 +22,7 @@
 }
 
 /* ---------------------------------------------------------------------------
- * Base — estética clara, suave, estilo iOS/macOS
+ * Base — estética Neumorphic (Soft UI 3D), tátil e esculpida em superfície única
  * ------------------------------------------------------------------------- */
 
 html {
@@ -29,8 +30,8 @@ html {
 }
 
 body {
-  background-color: #f2f2f7;
-  color: #1c1c1e;
+  background-color: #eef1f7;
+  color: #2c3444;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
 }
@@ -40,49 +41,86 @@ body {
 }
 
 /* ---------------------------------------------------------------------------
- * Glassmorphism
+ * Neumorphism & Soft UI Components
  * ------------------------------------------------------------------------- */
 
 @layer components {
-  /* Vidro padrão sobre fundos claros e mapas — translúcido */
+  /* Card/superfície esculpida em alto relevo neumórfico */
+  .neuro-card {
+    background-color: #eef1f7;
+    box-shadow:
+      -10px -10px 22px rgba(255, 255, 255, 0.95),
+      10px 10px 22px rgba(175, 188, 212, 0.55);
+    border: 1px solid rgba(255, 255, 255, 0.65);
+  }
+
+  /* Superfície côncava em baixo-relevo (inset) para boxes de descrição e inputs */
+  .neuro-inset {
+    background-color: #eef1f7;
+    box-shadow:
+      inset -4px -4px 8px rgba(255, 255, 255, 0.95),
+      inset 4px 4px 8px rgba(178, 190, 214, 0.45);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+  }
+
+  /* Pílula / Botão tátil em relevo neumórfico suave */
+  .neuro-pill {
+    background-color: #eef1f7;
+    box-shadow:
+      -5px -5px 12px rgba(255, 255, 255, 0.95),
+      5px 5px 12px rgba(178, 190, 214, 0.55);
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    transition: all 0.2s ease;
+  }
+
+  .neuro-pill:active {
+    box-shadow:
+      inset -3px -3px 6px rgba(255, 255, 255, 0.9),
+      inset 3px 3px 6px rgba(178, 190, 214, 0.45);
+  }
+
+  /* Anel arco-íris em gradiente cônico para pontuação */
+  .neuro-rainbow-ring {
+    background: conic-gradient(
+      from 0deg,
+      #ff6b6b,
+      #ff9f68,
+      #ffd166,
+      #06d6a0,
+      #1b9aaa,
+      #8338ec,
+      #ff6b6b
+    );
+    padding: 3px;
+    border-radius: 9999px;
+    box-shadow:
+      -6px -6px 14px rgba(255, 255, 255, 0.95),
+      6px 6px 14px rgba(178, 190, 214, 0.55);
+  }
+
+  /* Vidros compatíveis com Neumorphism para componentes herdados */
   .glass {
-    background: linear-gradient(
-      135deg,
-      rgb(255 255 255 / 0.5),
-      rgb(255 255 255 / 0.28)
-    );
-    backdrop-filter: blur(28px) saturate(180%);
-    -webkit-backdrop-filter: blur(28px) saturate(180%);
-    border: 1px solid rgb(255 255 255 / 0.5);
+    background-color: #eef1f7;
     box-shadow:
-      0 8px 32px rgb(31 38 135 / 0.08),
-      0 1.5px 6px rgb(31 38 135 / 0.05),
-      inset 0 1px 0 rgb(255 255 255 / 0.8);
+      -6px -6px 14px rgba(255, 255, 255, 0.95),
+      6px 6px 14px rgba(178, 190, 214, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.6);
   }
 
-  /* Vidro mais denso, para modais e bottom sheets — translúcido */
   .glass-strong {
-    background: linear-gradient(
-      135deg,
-      rgb(255 255 255 / 0.68),
-      rgb(255 255 255 / 0.45)
-    );
-    backdrop-filter: blur(36px) saturate(190%);
-    -webkit-backdrop-filter: blur(36px) saturate(190%);
-    border: 1px solid rgb(255 255 255 / 0.6);
+    background-color: #eef1f7;
     box-shadow:
-      0 24px 64px rgb(31 38 135 / 0.14),
-      0 2px 10px rgb(31 38 135 / 0.06),
-      inset 0 1px 0 rgb(255 255 255 / 0.9);
+      -10px -10px 22px rgba(255, 255, 255, 0.95),
+      10px 10px 22px rgba(175, 188, 212, 0.55);
+    border: 1px solid rgba(255, 255, 255, 0.7);
   }
 
-  /* Vidro sutil, para chips e pills — translúcido */
   .glass-soft {
-    background: rgb(255 255 255 / 0.32);
-    backdrop-filter: blur(16px) saturate(160%);
-    -webkit-backdrop-filter: blur(16px) saturate(160%);
-    border: 1px solid rgb(255 255 255 / 0.4);
-    box-shadow: 0 2px 10px rgb(31 38 135 / 0.05);
+    background-color: #eef1f7;
+    box-shadow:
+      -4px -4px 10px rgba(255, 255, 255, 0.9),
+      4px 4px 10px rgba(178, 190, 214, 0.45);
+    border: 1px solid rgba(255, 255, 255, 0.55);
   }
 
   .pride-gradient {
@@ -100,36 +138,24 @@ body {
   .pride-text {
     background: linear-gradient(
       90deg,
-      #ff453a,
-      #ff9f0a,
-      #c7a600,
-      #28a745,
-      #0a84ff,
-      #bf5af2
+      #ff5e62,
+      #ff9966,
+      #f5af19,
+      #00b09b,
+      #2193b0,
+      #a770ef
     );
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
-    /* Traçado preto fino ao redor do texto degradê */
-    -webkit-text-stroke: 0.6px rgb(0 0 0 / 0.9);
-    paint-order: stroke fill;
   }
 }
 
-/* Fundo decorativo das páginas internas (blobs pastéis).
-   Aplicado diretamente no <main> das páginas — NÃO usar position/z-index aqui:
-   z-index negativo coloca a página atrás do <body> e bloqueia todos os cliques. */
+/* Fundo da superfície única em tons Neumórficos cinza-lilás suave */
 .app-backdrop {
-  background:
-    radial-gradient(42rem 30rem at 8% -10%, rgb(255 69 58 / 0.09), transparent 60%),
-    radial-gradient(38rem 28rem at 100% 0%, rgb(10 132 255 / 0.1), transparent 60%),
-    radial-gradient(40rem 30rem at 50% 115%, rgb(191 90 242 / 0.1), transparent 60%),
-    #f2f2f7;
+  background: #eef1f7;
 }
 
-/* Mapa ocupa a viewport inteira atrás dos overlays.
-   O posicionamento é inline (bahia-map.tsx) para não perder a disputa de
-   cascata com o .maplibregl-map do CSS do MapLibre. */
 .map-container {
   z-index: 0;
 }
@@ -139,7 +165,7 @@ body {
   opacity: 0.7;
 }
 
-/* Animações suaves estilo iOS */
+/* Animações suaves */
 @keyframes sheet-up {
   from {
     transform: translateY(24px);
@@ -167,3 +193,4 @@ body {
 .animate-fade-in {
   animation: fade-in 0.25s ease-out;
 }
+
