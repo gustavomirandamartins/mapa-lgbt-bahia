@@ -15,9 +15,8 @@ import type { Municipio } from "@/lib/auth-guards";
 import { MunicipioCard } from "@/components/map/municipio-card";
 
 /**
- * Estilo 100% local: sem tiles externos — o próprio GeoJSON dos municípios
- * é o mapa. Carrega instantaneamente e funciona offline (PWA).
- * Apenas os glifos dos rótulos são externos (degrada sem quebrar o mapa).
+ * Estilo 100% local: sem tiles externos — os GeoJSONs do mapa fornecem toda a
+ * geometria. Funciona offline (PWA) e carrega instantaneamente.
  */
 const ESTILO_LOCAL: StyleSpecification = {
   version: 8,
@@ -27,16 +26,35 @@ const ESTILO_LOCAL: StyleSpecification = {
     {
       id: "background",
       type: "background",
-      paint: { "background-color": "#dbeafe" },
+      paint: { "background-color": "#0284c7" },
+    },
+  ],
+};
+
+/** Polígono mundial completo para cobrir o oceano sem emendas nem cortes. */
+const FULL_WORLD_OCEAN: GeoJSON.FeatureCollection = {
+  type: "FeatureCollection",
+  features: [
+    {
+      type: "Feature",
+      geometry: {
+        type: "Polygon",
+        coordinates: [
+          [
+            [-180, -90],
+            [180, -90],
+            [180, 90],
+            [-180, 90],
+            [-180, -90],
+          ],
+        ],
+      },
+      properties: {},
     },
   ],
 };
 
 const COR_GLOW = "#ef4444";
-
-/** Cor da terra fora da Bahia (rosa choque liso; o gradiente para preto nas
- *  extremidades vem da vinheta estática em app/page.tsx). */
-const COR_TERRA = "#ff1493";
 
 /** Gerador de número pseudo-aleatório determinístico (seed fixo). */
 function criarPrng(seed = 123456789) {
@@ -49,19 +67,27 @@ function criarPrng(seed = 123456789) {
 }
 
 // ----------------------------------------------------------------------------
-// Mar animado — bolhas de gradiente em tons de mar que derivam lentamente,
-// simulando a vista superior do oceano em movimento.
+// Efeito visual do mar (animado) e da terra fora da Bahia (estático).
+// Utilizam a mesma estrutura de gradientes radiais em movimento/composição.
 // ----------------------------------------------------------------------------
 
 const TONS_MAR = [
-  [255, 255, 255], // brilho
-  [147, 197, 253], // blue-300
-  [96, 165, 250], // blue-400
-  [191, 219, 254], // blue-200
-  [59, 130, 246], // blue-500
+  [255, 255, 255], // brilho do sol / espuma
+  [224, 242, 254], // blue-100
+  [125, 211, 252], // sky-300
+  [56, 189, 248],  // sky-400
+  [37, 99, 235],   // blue-600
 ] as const;
 
-interface BolhaMar {
+const TONS_TERRA_ROSA = [
+  [255, 20, 147],  // rosa choque / hot pink
+  [244, 63, 94],   // rose-500
+  [236, 72, 153],  // pink-500
+  [217, 70, 239],  // fuchsia-500
+  [136, 19, 55],   // rose-900
+] as const;
+
+interface BolhaGradiente {
   x: number;
   y: number;
   r: number;
@@ -73,37 +99,42 @@ interface BolhaMar {
   alpha: number;
 }
 
-function criarBolhasMar(seed: number, quantidade: number): BolhaMar[] {
+function criarBolhasGradiente(
+  seed: number,
+  quantidade: number,
+  paleta: readonly (readonly [number, number, number])[]
+): BolhaGradiente[] {
   const prng = criarPrng(seed);
-  const bolhas: BolhaMar[] = [];
+  const bolhas: BolhaGradiente[] = [];
   for (let i = 0; i < quantidade; i++) {
     bolhas.push({
       x: prng() * 256,
       y: prng() * 256,
-      r: 34 + prng() * 62,
-      dx: 14 + prng() * 26,
-      dy: 14 + prng() * 26,
-      freq: 0.35 + prng() * 0.5,
+      r: 36 + prng() * 68,
+      dx: 22 + prng() * 38,
+      dy: 22 + prng() * 38,
+      freq: 0.6 + prng() * 0.7,
       fase: prng() * Math.PI * 2,
-      cor: TONS_MAR[Math.floor(prng() * TONS_MAR.length)],
-      alpha: 0.2 + prng() * 0.22,
+      cor: paleta[Math.floor(prng() * paleta.length)],
+      alpha: 0.25 + prng() * 0.3,
     });
   }
   return bolhas;
 }
 
-function desenharMar(
+function desenharGradientes(
   c: CanvasRenderingContext2D,
   t: number,
   tamanho: number,
-  bolhas: BolhaMar[]
+  corFundo: string,
+  bolhas: BolhaGradiente[]
 ) {
-  c.fillStyle = "#dbeafe";
+  c.fillStyle = corFundo;
   c.fillRect(0, 0, tamanho, tamanho);
   for (const b of bolhas) {
     const x = b.x + Math.sin(t * b.freq + b.fase) * b.dx;
-    const y = b.y + Math.cos(t * b.freq * 0.83 + b.fase) * b.dy;
-    // Desenha espelhado nas bordas para manter o tile sem emendas
+    const y = b.y + Math.cos(t * b.freq * 0.82 + b.fase) * b.dy;
+    // Desenha espelhado em matriz 3x3 para manter o padrão 100% sem emendas (seamless tiling)
     for (const ox of [-tamanho, 0, tamanho]) {
       for (const oy of [-tamanho, 0, tamanho]) {
         const [r, g, bCor] = b.cor;
@@ -115,6 +146,20 @@ function desenharMar(
       }
     }
   }
+}
+
+/** Cria a textura estática da terra fora da Bahia (preto → rosa choque com gradientes). */
+function criarTexturaTerra(tamanho = 256): ImageData {
+  const canvas = document.createElement("canvas");
+  canvas.width = tamanho;
+  canvas.height = tamanho;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) throw new Error("Não foi possível criar o contexto 2D");
+
+  const bolhas = criarBolhasGradiente(1969, 12, TONS_TERRA_ROSA);
+  desenharGradientes(ctx, 0, tamanho, "#09090b", bolhas);
+
+  return ctx.getImageData(0, 0, tamanho, tamanho);
 }
 
 /** Bounding box do estado da Bahia. */
@@ -186,37 +231,44 @@ export function BahiaMap({ indices, municipios }: BahiaMapProps) {
       console.error("[mapa]", event.error?.message ?? event);
     });
 
-    // Canvas do mar animado (atualizado por intervalo)
+    // Canvas do mar animado
     const tamanhoMar = 256;
     const canvasMar = document.createElement("canvas");
     canvasMar.width = tamanhoMar;
     canvasMar.height = tamanhoMar;
     const ctxMar = canvasMar.getContext("2d");
-    const bolhasMar = criarBolhasMar(2024, 9);
+    const bolhasMar = criarBolhasGradiente(2024, 12, TONS_MAR);
     let intervaloMar: number | undefined;
 
     map.on("load", async () => {
-      // Mar animado: registra o primeiro frame e agenda atualizações
+      // 1. Textura estática para a terra fora da Bahia (preto + rosa choque)
+      const texturaTerra = criarTexturaTerra(256);
+      map.addImage("terra-pattern", texturaTerra, { pixelRatio: 1 });
+
+      // 2. Registra a imagem do mar animado e inicia a animação contínua
       if (ctxMar) {
-        desenharMar(ctxMar, 0, tamanhoMar, bolhasMar);
-        map.addImage("mar-anim", ctxMar.getImageData(0, 0, tamanhoMar, tamanhoMar), {
-          pixelRatio: 1,
-        });
+        desenharGradientes(ctxMar, 0, tamanhoMar, "#0369a1", bolhasMar);
+        map.addImage(
+          "mar-anim",
+          ctxMar.getImageData(0, 0, tamanhoMar, tamanhoMar),
+          { pixelRatio: 1 }
+        );
+
         let frame = 0;
         intervaloMar = window.setInterval(() => {
           if (mapRef.current !== map) return;
           frame += 1;
-          desenharMar(ctxMar, frame * 0.06, tamanhoMar, bolhasMar);
+          desenharGradientes(ctxMar, frame * 0.08, tamanhoMar, "#0369a1", bolhasMar);
           map.updateImage(
             "mar-anim",
             ctxMar.getImageData(0, 0, tamanhoMar, tamanhoMar)
           );
-        }, 120);
+          map.triggerRepaint();
+        }, 80);
       }
 
-      const [terra, agua, geojson, contorno] = await Promise.all([
+      const [terra, geojson, contorno] = await Promise.all([
         fetch("/geo/terra.geojson").then((r) => r.json()),
-        fetch("/geo/agua.geojson").then((r) => r.json()),
         fetch("/geo/bahia-municipios.geojson").then((r) => r.json()),
         fetch("/geo/bahia-contorno.geojson").then((r) => r.json()),
       ]);
@@ -236,25 +288,25 @@ export function BahiaMap({ indices, municipios }: BahiaMapProps) {
         corPreenchimento = expressao;
       }
 
-      // 1. Terra de fundo (rosa escuro liso) — fora da Bahia
+      // Layer 1. Oceano Infinito (fundo da viewport inteira com mar animado)
+      map.addSource("ocean-source", { type: "geojson", data: FULL_WORLD_OCEAN });
+      map.addLayer({
+        id: "ocean-fill",
+        type: "fill",
+        source: "ocean-source",
+        paint: { "fill-pattern": "mar-anim" },
+      });
+
+      // Layer 2. Terra fora da Bahia (gradientes preto → rosa choque, estático)
       map.addSource("terra", { type: "geojson", data: terra });
       map.addLayer({
         id: "terra-fill",
         type: "fill",
         source: "terra",
-        paint: { "fill-color": COR_TERRA },
+        paint: { "fill-pattern": "terra-pattern" },
       });
 
-      // 2. Máscara de água com mar animado (gradientes em movimento)
-      map.addSource("agua", { type: "geojson", data: agua });
-      map.addLayer({
-        id: "agua-fill",
-        type: "fill",
-        source: "agua",
-        paint: { "fill-pattern": "mar-anim" },
-      });
-
-      // 3. Municípios da Bahia
+      // Layer 3. Municípios da Bahia
       map.addSource("municipios", {
         type: "geojson",
         data: geojson,
@@ -276,7 +328,7 @@ export function BahiaMap({ indices, municipios }: BahiaMapProps) {
         },
       });
 
-      // 3.1 Glow rosa choque para municípios de referência (81–100)
+      // Layer 3.1 Glow para municípios de referência (81–100)
       const idsReferencia = indices
         .filter((i) => i.nota_final >= 81)
         .map((i) => i.municipio_id);
@@ -312,7 +364,7 @@ export function BahiaMap({ indices, municipios }: BahiaMapProps) {
         },
       });
 
-      // 4. Contorno do estado com glow
+      // Layer 4. Contorno da Bahia com Glow Branco Intenso
       map.addSource("contorno", { type: "geojson", data: contorno });
       map.addLayer({
         id: "contorno-glow",
@@ -320,9 +372,9 @@ export function BahiaMap({ indices, municipios }: BahiaMapProps) {
         source: "contorno",
         paint: {
           "line-color": "#ffffff",
-          "line-width": 8,
-          "line-blur": 7,
-          "line-opacity": 0.75,
+          "line-width": 14,
+          "line-blur": 10,
+          "line-opacity": 0.95,
         },
       });
       map.addLayer({
@@ -330,13 +382,13 @@ export function BahiaMap({ indices, municipios }: BahiaMapProps) {
         type: "line",
         source: "contorno",
         paint: {
-          "line-color": "#3b5f8a",
-          "line-width": 2.2,
-          "line-opacity": 0.8,
+          "line-color": "#ffffff",
+          "line-width": 2.5,
+          "line-opacity": 1,
         },
       });
 
-      // 5. Contorno de destaque do município selecionado
+      // Layer 5. Destaque do município selecionado
       map.addLayer({
         id: "municipios-selecionado",
         type: "line",
@@ -348,7 +400,7 @@ export function BahiaMap({ indices, municipios }: BahiaMapProps) {
         },
       });
 
-      // 6. Rótulos dos municípios (aparecem conforme o zoom)
+      // Layer 6. Rótulos dos municípios
       map.addLayer({
         id: "municipios-label",
         type: "symbol",
