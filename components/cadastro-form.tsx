@@ -1,7 +1,7 @@
 "use client";
 
-import { useActionState } from "react";
-import { UserPlus, Mail, Lock, User, MapPin } from "lucide-react";
+import { useActionState, useState } from "react";
+import { UserPlus, Mail, Lock, User, MapPin, Eye, EyeOff } from "lucide-react";
 
 import { cadastrar, type AuthFormState } from "@/lib/actions/auth";
 import type { Municipio } from "@/lib/auth-guards";
@@ -10,6 +10,7 @@ const initialState: AuthFormState = { error: null };
 
 export function CadastroForm({ municipios }: { municipios: Municipio[] }) {
   const [state, formAction, pending] = useActionState(cadastrar, initialState);
+  const [mostrarSenha, setMostrarSenha] = useState(false);
   const sucesso = !state.error && pending === false && state !== initialState;
 
   return (
@@ -61,13 +62,26 @@ export function CadastroForm({ municipios }: { municipios: Municipio[] }) {
         <Lock className="size-5 text-neutral-400" aria-hidden />
         <input
           name="password"
-          type="password"
+          type={mostrarSenha ? "text" : "password"}
           required
           minLength={8}
           autoComplete="new-password"
           placeholder="Senha (mín. 8 caracteres)"
           className="w-full bg-transparent text-base outline-none placeholder:text-neutral-400"
         />
+        <button
+          type="button"
+          onClick={() => setMostrarSenha((v) => !v)}
+          className="text-neutral-400 transition-colors hover:text-neutral-700 focus:outline-none"
+          title={mostrarSenha ? "Ocultar senha" : "Ver senha"}
+          aria-label={mostrarSenha ? "Ocultar senha" : "Ver senha"}
+        >
+          {mostrarSenha ? (
+            <EyeOff className="size-5" aria-hidden />
+          ) : (
+            <Eye className="size-5" aria-hidden />
+          )}
+        </button>
       </label>
 
       {state.error && (

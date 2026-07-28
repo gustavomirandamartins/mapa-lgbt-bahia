@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Users, ClipboardCheck, Eye, Map as MapIcon } from "lucide-react";
+import { Users, ClipboardCheck, Eye, Map as MapIcon, KeyRound } from "lucide-react";
 
 import { requireAdmin } from "@/lib/auth-guards";
 import {
@@ -13,6 +13,7 @@ import { corDaNota } from "@/lib/idt";
 import { PrideLogo } from "@/components/pride-logo";
 import { LogoutButton } from "@/components/logout-button";
 import { AdminActions } from "@/components/admin-actions";
+import { AlterarSenhaForm } from "@/components/alterar-senha-form";
 
 export const metadata: Metadata = { title: "Administração" };
 
@@ -176,6 +177,15 @@ export default async function AdminPage() {
               ))}
             </ul>
           )}
+        </section>
+
+        {/* Alterar Senha do Administrador */}
+        <section className="glass rounded-[2rem] p-6">
+          <h2 className="mb-4 flex items-center gap-2 text-sm font-bold tracking-tight">
+            <KeyRound className="size-4 text-neutral-500" aria-hidden />
+            Alterar Senha de Acesso
+          </h2>
+          <AlterarSenhaForm />
         </section>
       </div>
     </main>

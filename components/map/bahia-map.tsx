@@ -102,21 +102,22 @@ interface BolhaGradiente {
 function criarBolhasGradiente(
   seed: number,
   quantidade: number,
-  paleta: readonly (readonly [number, number, number])[]
+  paleta: readonly (readonly [number, number, number])[],
+  tamanho = 512
 ): BolhaGradiente[] {
   const prng = criarPrng(seed);
   const bolhas: BolhaGradiente[] = [];
   for (let i = 0; i < quantidade; i++) {
     bolhas.push({
-      x: prng() * 256,
-      y: prng() * 256,
-      r: 36 + prng() * 68,
-      dx: 22 + prng() * 38,
-      dy: 22 + prng() * 38,
-      freq: 0.6 + prng() * 0.7,
+      x: prng() * tamanho,
+      y: prng() * tamanho,
+      r: (160 + prng() * 240) * (tamanho / 512),
+      dx: (35 + prng() * 60) * (tamanho / 512),
+      dy: (35 + prng() * 60) * (tamanho / 512),
+      freq: 0.35 + prng() * 0.45,
       fase: prng() * Math.PI * 2,
       cor: paleta[Math.floor(prng() * paleta.length)],
-      alpha: 0.25 + prng() * 0.3,
+      alpha: 0.3 + prng() * 0.35,
     });
   }
   return bolhas;
@@ -149,14 +150,14 @@ function desenharGradientes(
 }
 
 /** Cria a textura estática da terra fora da Bahia (preto → rosa choque com gradientes). */
-function criarTexturaTerra(tamanho = 256): ImageData {
+function criarTexturaTerra(tamanho = 512): ImageData {
   const canvas = document.createElement("canvas");
   canvas.width = tamanho;
   canvas.height = tamanho;
   const ctx = canvas.getContext("2d");
   if (!ctx) throw new Error("Não foi possível criar o contexto 2D");
 
-  const bolhas = criarBolhasGradiente(1969, 12, TONS_TERRA_ROSA);
+  const bolhas = criarBolhasGradiente(1969, 8, TONS_TERRA_ROSA, tamanho);
   desenharGradientes(ctx, 0, tamanho, "#09090b", bolhas);
 
   return ctx.getImageData(0, 0, tamanho, tamanho);
@@ -231,19 +232,19 @@ export function BahiaMap({ indices, municipios }: BahiaMapProps) {
       console.error("[mapa]", event.error?.message ?? event);
     });
 
-    // Canvas do mar animado
-    const tamanhoMar = 256;
+    // Canvas do mar animado (512x512 para gradientes amplos e imersivos)
+    const tamanhoMar = 512;
     const canvasMar = document.createElement("canvas");
     canvasMar.width = tamanhoMar;
     canvasMar.height = tamanhoMar;
     const ctxMar = canvasMar.getContext("2d");
-    const bolhasMar = criarBolhasGradiente(2024, 12, TONS_MAR);
+    const bolhasMar = criarBolhasGradiente(2024, 8, TONS_MAR, tamanhoMar);
     let intervaloMar: number | undefined;
 
     map.on("load", async () => {
       // 1. Textura estática para a terra fora da Bahia (preto + rosa choque)
-      const texturaTerra = criarTexturaTerra(256);
-      map.addImage("terra-pattern", texturaTerra, { pixelRatio: 1 });
+      const texturaTerra = criarTexturaTerra(512);
+      map.addImage("terra-pattern", texturaTerra, { pixelRatio: 0.35 });
 
       // 2. Registra a imagem do mar animado e inicia a animação contínua
       if (ctxMar) {
@@ -251,7 +252,7 @@ export function BahiaMap({ indices, municipios }: BahiaMapProps) {
         map.addImage(
           "mar-anim",
           ctxMar.getImageData(0, 0, tamanhoMar, tamanhoMar),
-          { pixelRatio: 1 }
+          { pixelRatio: 0.35 }
         );
 
         let frame = 0;

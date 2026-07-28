@@ -89,3 +89,36 @@ export async function logout() {
   revalidatePath("/", "layout");
   redirect("/");
 }
+
+export interface AlterarSenhaState {
+  error: string | null;
+  sucesso?: string | null;
+}
+
+export async function alterarSenha(
+  _prevState: AlterarSenhaState,
+  formData: FormData
+): Promise<AlterarSenhaState> {
+  const password = String(formData.get("password") ?? "").trim();
+  const confirmPassword = String(formData.get("confirmPassword") ?? "").trim();
+
+  if (!password || !confirmPassword) {
+    return { error: "Preencha a nova senha e a confirmação." };
+  }
+  if (password.length < 8) {
+    return { error: "A nova senha deve ter pelo menos 8 caracteres." };
+  }
+  if (password !== confirmPassword) {
+    return { error: "As senhas não coincidem." };
+  }
+
+  const supabase = await createClient();
+  const { error } = await supabase.auth.updateUser({ password });
+
+  if (error) {
+    return { error: `Erro ao alterar a senha: ${error.message}` };
+  }
+
+  return { error: null, sucesso: "Senha atualizada com sucesso!" };
+}
+

@@ -1,8 +1,8 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import Link from "next/link";
-import { LogIn, Mail, Lock, ArrowLeft } from "lucide-react";
+import { LogIn, Mail, Lock, ArrowLeft, Eye, EyeOff } from "lucide-react";
 
 import { login, type AuthFormState } from "@/lib/actions/auth";
 import { PrideLogo } from "@/components/pride-logo";
@@ -12,6 +12,7 @@ const initialState: AuthFormState = { error: null };
 
 export default function LoginPage() {
   const [state, formAction, pending] = useActionState(login, initialState);
+  const [mostrarSenha, setMostrarSenha] = useState(false);
 
   return (
     <main className="app-backdrop flex min-h-dvh flex-col items-center justify-center px-4 py-10">
@@ -46,12 +47,25 @@ export default function LoginPage() {
             <Lock className="size-5 text-neutral-400" aria-hidden />
             <input
               name="password"
-              type="password"
+              type={mostrarSenha ? "text" : "password"}
               required
               autoComplete="current-password"
               placeholder="Senha"
               className="w-full bg-transparent text-base outline-none placeholder:text-neutral-400"
             />
+            <button
+              type="button"
+              onClick={() => setMostrarSenha((v) => !v)}
+              className="text-neutral-400 transition-colors hover:text-neutral-700 focus:outline-none"
+              title={mostrarSenha ? "Ocultar senha" : "Ver senha"}
+              aria-label={mostrarSenha ? "Ocultar senha" : "Ver senha"}
+            >
+              {mostrarSenha ? (
+                <EyeOff className="size-5" aria-hidden />
+              ) : (
+                <Eye className="size-5" aria-hidden />
+              )}
+            </button>
           </label>
 
           {state.error && (
