@@ -14,7 +14,7 @@ export default function LoginPage() {
   const [mostrarSenha, setMostrarSenha] = useState(false);
 
   return (
-    <main className="app-backdrop flex min-h-dvh flex-col items-center justify-center px-4 py-10 bg-[#eef1f7]">
+    <main className="app-backdrop flex min-h-dvh flex-col items-center justify-center px-4 py-10">
       <div className="neuro-card w-full max-w-md rounded-[2.5rem] p-8 sm:p-10">
         <div className="mb-8 flex flex-col items-center text-center">
           <div className="neuro-rainbow-ring mb-2">

@@ -9,7 +9,7 @@ import {
 } from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 
-import { corDaNota } from "@/lib/idt";
+import { COR_SEM_DADOS, corDaNota } from "@/lib/idt";
 import type { IndicePublico } from "@/lib/public-data";
 import type { Municipio } from "@/lib/auth-guards";
 import { MunicipioCard } from "@/components/map/municipio-card";
@@ -26,7 +26,7 @@ const ESTILO_LOCAL: StyleSpecification = {
     {
       id: "background",
       type: "background",
-      paint: { "background-color": "#eef1f7" },
+      paint: { "background-color": "rgba(238, 241, 247, 0)" },
     },
   ],
 };
@@ -53,8 +53,6 @@ const FULL_WORLD_OCEAN: GeoJSON.FeatureCollection = {
     },
   ],
 };
-
-const COR_GLOW = "#f7a1c2";
 
 /** Bounding box do estado da Bahia. */
 const BAHIA_BOUNDS: [[number, number], [number, number]] = [
@@ -131,7 +129,7 @@ export function BahiaMap({ indices, municipios }: BahiaMapProps) {
         fetch("/geo/bahia-contorno.geojson").then((r) => r.json()),
       ]);
 
-      const COR_PADRAO_MAPA = "#bee7da";
+      const COR_PADRAO_MAPA = COR_SEM_DADOS;
       let corPreenchimento: unknown = COR_PADRAO_MAPA;
       if (indices.length > 0) {
         const expressao: unknown[] = [
@@ -145,22 +143,28 @@ export function BahiaMap({ indices, municipios }: BahiaMapProps) {
         corPreenchimento = expressao;
       }
 
-      // Layer 1. Oceano (superfície única Neumorphism #eef1f7)
+      // Layer 1. Oceano (superfície única Neumorphism semi-transparente para o gradiente ambiental)
       map.addSource("ocean-source", { type: "geojson", data: FULL_WORLD_OCEAN });
       map.addLayer({
         id: "ocean-fill",
         type: "fill",
         source: "ocean-source",
-        paint: { "fill-color": "#eef1f7" },
+        paint: {
+          "fill-color": "#eef1f7",
+          "fill-opacity": 0.45,
+        },
       });
 
-      // Layer 2. Terra fora da Bahia (mesma superfície #eef1f7)
+      // Layer 2. Terra fora da Bahia
       map.addSource("terra", { type: "geojson", data: terra });
       map.addLayer({
         id: "terra-fill",
         type: "fill",
         source: "terra",
-        paint: { "fill-color": "#eef1f7" },
+        paint: {
+          "fill-color": "#eef1f7",
+          "fill-opacity": 0.55,
+        },
       });
 
       // Layer 2.1 e 2.2. Sombras 3D em Relevo Neumórfico (Extrusão do contorno da Bahia)
@@ -210,16 +214,14 @@ export function BahiaMap({ indices, municipios }: BahiaMapProps) {
         },
       });
 
-      // Layer 3.1 Glow para municípios de referência (81–100)
-      const idsReferencia = indices
-        .filter((i) => i.nota_final >= 81)
-        .map((i) => i.municipio_id);
-      if (idsReferencia.length > 0) {
+      // Layer 3.1 Glow neon para todos os municípios avaliados (cores vivas)
+      const idsAvaliados = indices.map((i) => i.municipio_id);
+      if (idsAvaliados.length > 0) {
         const filtroGlow: unknown[] = [
           "match",
           ["to-number", ["get", "codarea"]],
         ];
-        for (const id of idsReferencia) filtroGlow.push(id, true);
+        for (const id of idsAvaliados) filtroGlow.push(id, true);
         filtroGlow.push(false);
         map.addLayer({
           id: "municipios-glow",
@@ -227,10 +229,10 @@ export function BahiaMap({ indices, municipios }: BahiaMapProps) {
           source: "municipios",
           filter: filtroGlow as never,
           paint: {
-            "line-color": COR_GLOW,
-            "line-width": 4,
-            "line-blur": 3,
-            "line-opacity": 0.85,
+            "line-color": corPreenchimento as never,
+            "line-width": 5,
+            "line-blur": 4,
+            "line-opacity": 0.95,
           },
         });
       }

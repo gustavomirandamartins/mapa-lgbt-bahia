@@ -15,7 +15,7 @@ export default async function HomePage() {
   ]);
 
   return (
-    <main className="relative h-dvh w-full overflow-hidden bg-[#eef1f7]">
+    <main className="app-backdrop relative h-dvh w-full overflow-hidden">
       <BahiaMap indices={indices} municipios={municipios} />
 
       {/* Header flutuante em relevo Neumórfico (Soft UI 3D) */}

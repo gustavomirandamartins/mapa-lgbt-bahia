@@ -218,14 +218,14 @@ export const TOTAL_PERGUNTAS = IDT_QUESTIONARIO.reduce(
 // Classificação (faixas oficiais)
 // ----------------------------------------------------------------------------
 
-export const COR_SEM_DADOS = "#c7beeb";
+export const COR_SEM_DADOS = "#e2e6f0";
 
 export const CLASSIFICACOES: (IdtClassificacao & { min: number; max: number })[] = [
-  { min: 0, max: 20, nivel: "Município Inexistente", faixa: "0–20", cor: "#96c8f2" },
-  { min: 20, max: 40, nivel: "Município Sensibilizado", faixa: "21–40", cor: "#8fe5d0" },
-  { min: 40, max: 60, nivel: "Município Estruturante", faixa: "41–60", cor: "#fcd2b1" },
-  { min: 60, max: 80, nivel: "Município Consolidado", faixa: "61–80", cor: "#f8ac7a" },
-  { min: 80, max: 100, nivel: "Município Referência em Turismo LGBTQIAPN+", faixa: "81–100", cor: "#f7a1c2" },
+  { min: 0, max: 20, nivel: "Município Inexistente", faixa: "0–20", cor: "#1880fb" },
+  { min: 20, max: 40, nivel: "Município Sensibilizado", faixa: "21–40", cor: "#00cc00" },
+  { min: 40, max: 60, nivel: "Município Estruturante", faixa: "41–60", cor: "#ffd000" },
+  { min: 60, max: 80, nivel: "Município Consolidado", faixa: "61–80", cor: "#ff8000" },
+  { min: 80, max: 100, nivel: "Município Referência em Turismo LGBTQIAPN+", faixa: "81–100", cor: "#ff0000" },
 ];
 
 export function classificar(nota: number): IdtClassificacao {

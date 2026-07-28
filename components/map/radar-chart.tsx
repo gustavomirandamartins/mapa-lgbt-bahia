@@ -68,14 +68,14 @@ export function RadarChart({ eixos, size = 260 }: RadarChartProps) {
       {/* Polígono de dados */}
       <polygon
         points={poligonoDados}
-        fill="rgb(150 200 242 / 0.35)"
-        stroke="#8fe5d0"
+        fill="rgb(24 128 251 / 0.25)"
+        stroke="#1880fb"
         strokeWidth={2.5}
         strokeLinejoin="round"
       />
       {eixos.map((eixo, i) => {
         const p = ponto(i, Math.max(0, Math.min(100, eixo.percentual)) / 100);
-        return <circle key={`ponto-${i}`} cx={p.x} cy={p.y} r={3.5} fill="#f7a1c2" />;
+        return <circle key={`ponto-${i}`} cx={p.x} cy={p.y} r={3.5} fill="#00cc00" />;
       })}
 
       {/* Rótulos */}
