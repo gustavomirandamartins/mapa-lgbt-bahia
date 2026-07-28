@@ -13,6 +13,7 @@ import { COR_SEM_DADOS, corDaNota } from "@/lib/idt";
 import type { IndicePublico } from "@/lib/public-data";
 import type { Municipio } from "@/lib/auth-guards";
 import { MunicipioCard } from "@/components/map/municipio-card";
+import { MapLegend } from "@/components/map/map-legend";
 
 /**
  * Estilo 100% local: sem tiles externos — os GeoJSONs do mapa fornecem toda a
@@ -74,6 +75,7 @@ interface Selecao {
 export function BahiaMap({ indices, municipios }: BahiaMapProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<MapLibreMap | null>(null);
+  const centroidesRef = useRef<Map<number, [number, number]>>(new Map());
   const [selecao, setSelecao] = useState<Selecao | null>(null);
 
   const indicesPorMunicipio = useMemo(() => {
@@ -128,6 +130,16 @@ export function BahiaMap({ indices, municipios }: BahiaMapProps) {
         fetch("/geo/bahia-municipios.geojson").then((r) => r.json()),
         fetch("/geo/bahia-contorno.geojson").then((r) => r.json()),
       ]);
+
+      for (const feat of geojson.features || []) {
+        const cod = Number(feat.properties?.codarea);
+        const cent = feat.properties?.centroide as
+          | [number, number]
+          | undefined;
+        if (!Number.isNaN(cod) && cent) {
+          centroidesRef.current.set(cod, cent);
+        }
+      }
 
       const COR_PADRAO_MAPA = COR_SEM_DADOS;
       let corPreenchimento: unknown = COR_PADRAO_MAPA;
@@ -399,6 +411,27 @@ export function BahiaMap({ indices, municipios }: BahiaMapProps) {
        "Município")
     : "";
 
+  const selecionarMunicipio = (id: number) => {
+    const map = mapRef.current;
+    if (map) {
+      map.setFilter("municipios-selecionado", [
+        "==",
+        ["to-number", ["get", "codarea"]],
+        id,
+      ] as never);
+
+      const cent = centroidesRef.current.get(id);
+      if (cent) {
+        map.easeTo({
+          center: cent,
+          zoom: Math.max(map.getZoom(), 8.4),
+          duration: 500,
+        });
+      }
+    }
+    setSelecao({ municipioId: id });
+  };
+
   return (
     <>
       <div
@@ -406,6 +439,12 @@ export function BahiaMap({ indices, municipios }: BahiaMapProps) {
         className="map-container"
         style={{ position: "fixed", inset: 0, width: "100%", height: "100%" }}
         aria-label="Mapa da Bahia"
+      />
+      <MapLegend
+        indices={indices}
+        municipios={municipios}
+        municipioSelecionadoId={selecao?.municipioId ?? null}
+        onSelectMunicipio={selecionarMunicipio}
       />
       {selecao && (
         <MunicipioCard

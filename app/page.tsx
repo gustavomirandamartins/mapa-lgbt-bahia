@@ -3,7 +3,6 @@ import { ShieldCheck } from "lucide-react";
 
 import { getIndicesPublicos, getMunicipios } from "@/lib/public-data";
 import { BahiaMap } from "@/components/map/bahia-map";
-import { MapLegend } from "@/components/map/map-legend";
 import { PrideLogo } from "@/components/pride-logo";
 
 export const revalidate = 60;
@@ -42,15 +41,6 @@ export default async function HomePage() {
           Central de Controle
         </Link>
       </header>
-
-      <MapLegend avaliados={indices.length} total={municipios.length || 417} />
-
-      {/* Legenda compacta (mobile): barra de faixas no rodapé */}
-      <div className="neuro-card pointer-events-none fixed bottom-3 left-3 z-20 flex items-center gap-2 rounded-full px-4 py-2 sm:hidden">
-        <span className="text-[10px] font-bold text-[#64748b]">0</span>
-        <span className="h-2.5 w-24 rounded-full bg-[linear-gradient(to_right,#96c8f2,#8fe5d0,#fcd2b1,#f8ac7a,#f7a1c2)] shadow-[inset_1px_1px_2px_rgba(0,0,0,0.15)]" />
-        <span className="text-[10px] font-bold text-[#64748b]">100</span>
-      </div>
     </main>
   );
 }

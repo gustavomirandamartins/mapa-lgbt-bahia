@@ -20,6 +20,15 @@ export const metadata: Metadata = {
   },
   description:
     "Mapa interativo do Índice de Desenvolvimento do Turismo LGBTQIAPN+ (IDT-LGBT) dos 417 municípios da Bahia. Uma tecnologia de gestão social da SETUR-BA.",
+  icons: {
+    icon: [
+      { url: "/lgbt-favicon.png", type: "image/png" },
+    ],
+    shortcut: ["/lgbt-favicon.png"],
+    apple: [
+      { url: "/lgbt-mobileicon.png", sizes: "180x180", type: "image/png" },
+    ],
+  },
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
