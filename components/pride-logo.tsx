@@ -7,7 +7,7 @@ export function PrideLogo({ size = 40 }: { size?: number }) {
       style={{ width: size, height: size }}
     >
       <Image
-        src="/lgbt-favicon.png"
+        src="/icon.png"
         alt="Logo IDT-LGBT Bahia"
         width={size}
         height={size}

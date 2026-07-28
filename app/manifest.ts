@@ -15,13 +15,13 @@ export default function manifest(): MetadataRoute.Manifest {
     theme_color: "#eef1f7",
     icons: [
       {
-        src: "/lgbt-mobileicon.png",
+        src: "/apple-icon.png",
         sizes: "512x512",
         type: "image/png",
         purpose: "any",
       },
       {
-        src: "/lgbt-mobileicon.png",
+        src: "/apple-icon.png",
         sizes: "512x512",
         type: "image/png",
         purpose: "maskable",
