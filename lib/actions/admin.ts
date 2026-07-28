@@ -94,6 +94,7 @@ export async function aprovarAvaliacao(
   if (error) return { error: `Erro ao aprovar: ${error.message}` };
 
   revalidatePath("/admin");
+  revalidatePath("/painel");
   revalidatePath("/");
   return { error: null, sucesso: "Avaliação aprovada e publicada no mapa." };
 }
@@ -118,5 +119,6 @@ export async function rejeitarAvaliacao(
   if (error) return { error: `Erro ao rejeitar: ${error.message}` };
 
   revalidatePath("/admin");
+  revalidatePath("/painel");
   return { error: null, sucesso: "Avaliação devolvida ao município." };
 }

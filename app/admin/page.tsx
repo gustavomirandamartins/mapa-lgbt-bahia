@@ -46,7 +46,7 @@ export default async function AdminPage() {
       .order("created_at", { ascending: true }),
     supabase
       .from("avaliacoes")
-      .select("id, nota_final, classificacao, submitted_at, municipios(nome), profiles(nome)")
+      .select("id, nota_final, classificacao, submitted_at, municipios(nome), profiles!user_id(nome)")
       .eq("status", "pendente")
       .order("submitted_at", { ascending: true }),
   ]);

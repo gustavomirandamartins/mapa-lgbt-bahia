@@ -44,7 +44,7 @@ export default async function AvaliacaoDetalhePage({
   const { data } = await supabase
     .from("avaliacoes")
     .select(
-      "id, status, respostas, notas_eixos, nota_final, classificacao, submitted_at, municipios(nome), profiles(nome)"
+      "id, status, respostas, notas_eixos, nota_final, classificacao, submitted_at, municipios(nome), profiles!user_id(nome)"
     )
     .eq("id", id)
     .single();

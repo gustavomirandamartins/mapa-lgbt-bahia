@@ -63,6 +63,7 @@ export async function submeterAvaliacao(
     return { error: `Erro ao salvar a avaliação: ${error.message}` };
   }
 
+  revalidatePath("/admin");
   revalidatePath("/painel");
   return {
     error: null,
