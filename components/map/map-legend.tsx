@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import { Search, X } from "lucide-react";
 
-import { CLASSIFICACOES, COR_SEM_DADOS, corDaNota } from "@/lib/idt";
+import { CLASSIFICACOES, COR_SEM_DADOS, corDaNota, classificar } from "@/lib/idt";
 import type { IndicePublico } from "@/lib/public-data";
 import type { Municipio } from "@/lib/auth-guards";
 
@@ -12,6 +12,8 @@ export interface MapLegendProps {
   municipios: Municipio[];
   municipioSelecionadoId?: number | null;
   onSelectMunicipio?: (municipioId: number) => void;
+  faixaSelecionada?: string | null;
+  onSelectFaixa?: (faixa: string | null) => void;
 }
 
 /**
@@ -23,6 +25,8 @@ export function MapLegend({
   municipios,
   municipioSelecionadoId,
   onSelectMunicipio,
+  faixaSelecionada,
+  onSelectFaixa,
 }: MapLegendProps) {
   const [busca, setBusca] = useState("");
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -49,10 +53,84 @@ export function MapLegend({
       .toLowerCase();
 
   const municipiosFiltrados = useMemo(() => {
-    if (!busca.trim()) return listaMunicipios;
+    let lista = listaMunicipios;
+    if (faixaSelecionada) {
+      lista = lista.filter((m) => {
+        const ind = indicesPorId.get(m.id);
+        if (faixaSelecionada === "sem_avaliacao") {
+          return !ind;
+        }
+        if (!ind) return false;
+        return classificar(ind.nota_final).faixa === faixaSelecionada;
+      });
+    }
+    if (!busca.trim()) return lista;
     const termo = normalizar(busca.trim());
-    return listaMunicipios.filter((m) => normalizar(m.nome).includes(termo));
-  }, [listaMunicipios, busca]);
+    return lista.filter((m) => normalizar(m.nome).includes(termo));
+  }, [listaMunicipios, busca, faixaSelecionada, indicesPorId]);
+
+  const renderPilulasFaixas = () => (
+    <ul className="flex shrink-0 flex-col gap-2">
+      {CLASSIFICACOES.map((faixa) => {
+        const isAmarelo = faixa.cor === "#ffd000";
+        const isSelected = faixaSelecionada === faixa.faixa;
+        const isDimmed = Boolean(faixaSelecionada) && !isSelected;
+        return (
+          <li key={faixa.nivel}>
+            <button
+              type="button"
+              onClick={() =>
+                onSelectFaixa?.(isSelected ? null : faixa.faixa)
+              }
+              className={`flex w-full items-center justify-center rounded-full px-3.5 py-1.5 text-xs font-extrabold shadow-[0_4px_10px_rgba(0,0,0,0.14),inset_0_2px_2px_rgba(255,255,255,0.4)] transition-all ${
+                isAmarelo ? "text-[#111827]" : "text-white"
+              } ${
+                isSelected
+                  ? "scale-[1.03] ring-2 ring-[#2c3444] ring-offset-2 font-black"
+                  : ""
+              } ${isDimmed ? "opacity-45 hover:opacity-100" : ""}`}
+              style={{ backgroundColor: faixa.cor }}
+            >
+              {faixa.faixa} • {faixa.nivel.replace("Município ", "")}
+            </button>
+          </li>
+        );
+      })}
+      <li>
+        <button
+          type="button"
+          onClick={() =>
+            onSelectFaixa?.(
+              faixaSelecionada === "sem_avaliacao" ? null : "sem_avaliacao"
+            )
+          }
+          className={`flex w-full items-center justify-center rounded-full px-3.5 py-1.5 text-xs font-extrabold text-[#334155] shadow-[inset_1px_1px_3px_rgba(0,0,0,0.12),-2px_-2px_4px_rgba(255,255,255,0.8),2px_2px_4px_rgba(178,190,214,0.5)] transition-all ${
+            faixaSelecionada === "sem_avaliacao"
+              ? "scale-[1.03] ring-2 ring-[#2c3444] ring-offset-2 font-black"
+              : ""
+          } ${
+            Boolean(faixaSelecionada) && faixaSelecionada !== "sem_avaliacao"
+              ? "opacity-45 hover:opacity-100"
+              : ""
+          }`}
+          style={{ backgroundColor: COR_SEM_DADOS }}
+        >
+          Sem avaliação
+        </button>
+      </li>
+      {faixaSelecionada && (
+        <li>
+          <button
+            type="button"
+            onClick={() => onSelectFaixa?.(null)}
+            className="w-full text-center text-[11px] font-bold text-[#1880fb] underline hover:text-[#0055c4]"
+          >
+            Limpar filtro por cor
+          </button>
+        </li>
+      )}
+    </ul>
+  );
 
   const renderListaMunicipios = () => (
     <ul className="flex flex-col gap-1.5">
@@ -119,40 +197,18 @@ export function MapLegend({
           IDT-LGBT (0–100)
         </h3>
 
-        {/* Pílulas das 5 faixas + sem avaliação */}
-        <ul className="flex shrink-0 flex-col gap-2">
-          {CLASSIFICACOES.map((faixa) => {
-            const isAmarelo = faixa.cor === "#ffd000";
-            return (
-              <li key={faixa.nivel}>
-                <div
-                  className={`flex w-full items-center justify-center rounded-full px-3.5 py-1.5 text-xs font-extrabold shadow-[0_4px_10px_rgba(0,0,0,0.14),inset_0_2px_2px_rgba(255,255,255,0.4)] transition-transform hover:scale-[1.02] ${
-                    isAmarelo ? "text-[#111827]" : "text-white"
-                  }`}
-                  style={{ backgroundColor: faixa.cor }}
-                >
-                  {faixa.faixa} • {faixa.nivel.replace("Município ", "")}
-                </div>
-              </li>
-            );
-          })}
-          <li>
-            <div
-              className="flex w-full items-center justify-center rounded-full px-3.5 py-1.5 text-xs font-extrabold text-[#334155] shadow-[inset_1px_1px_3px_rgba(0,0,0,0.12),-2px_-2px_4px_rgba(255,255,255,0.8),2px_2px_4px_rgba(178,190,214,0.5)] transition-transform hover:scale-[1.02]"
-              style={{ backgroundColor: COR_SEM_DADOS }}
-            >
-              Sem avaliação
-            </div>
-          </li>
-        </ul>
+        {/* Pílulas das 5 faixas + sem avaliação (agora clicáveis para filtrar) */}
+        {renderPilulasFaixas()}
 
-        {/* Total avaliados */}
+        {/* Total avaliados ou filtrados */}
         <div className="mt-3.5 shrink-0 border-t border-[#dce3f0] pt-3 text-center">
           <p className="text-2xl leading-none font-extrabold tracking-tight text-[#1e293b]">
-            {indices.length} de {listaMunicipios.length || 417}
+            {faixaSelecionada
+              ? `${municipiosFiltrados.length} de ${listaMunicipios.length || 417}`
+              : `${indices.length} de ${listaMunicipios.length || 417}`}
           </p>
           <p className="mt-1 text-[10px] font-extrabold tracking-widest text-[#64748b] uppercase">
-            Municípios Avaliados
+            {faixaSelecionada ? "Municípios na Faixa" : "Municípios Avaliados"}
           </p>
         </div>
 
@@ -219,6 +275,9 @@ export function MapLegend({
                 <X className="size-4" />
               </button>
             </div>
+
+            {/* Filtros por faixa de cores no mobile */}
+            <div className="mb-4 shrink-0">{renderPilulasFaixas()}</div>
 
             {/* Campo de busca no modal */}
             <div className="relative mb-3.5 shrink-0">

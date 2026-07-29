@@ -9,7 +9,7 @@ import {
 } from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 
-import { COR_SEM_DADOS, corDaNota } from "@/lib/idt";
+import { COR_SEM_DADOS, corDaNota, classificar } from "@/lib/idt";
 import type { IndicePublico } from "@/lib/public-data";
 import type { Municipio } from "@/lib/auth-guards";
 import { MunicipioCard } from "@/components/map/municipio-card";
@@ -77,6 +77,8 @@ export function BahiaMap({ indices, municipios }: BahiaMapProps) {
   const mapRef = useRef<MapLibreMap | null>(null);
   const centroidesRef = useRef<Map<number, [number, number]>>(new Map());
   const [selecao, setSelecao] = useState<Selecao | null>(null);
+  const [faixaSelecionada, setFaixaSelecionada] = useState<string | null>(null);
+  const [mapLoaded, setMapLoaded] = useState(false);
 
   const indicesPorMunicipio = useMemo(() => {
     const mapa = new Map<number, IndicePublico>();
@@ -393,6 +395,8 @@ export function BahiaMap({ indices, municipios }: BahiaMapProps) {
           setSelecao(null);
         }
       });
+
+      setMapLoaded(true);
     });
 
     return () => {
@@ -432,6 +436,70 @@ export function BahiaMap({ indices, municipios }: BahiaMapProps) {
     setSelecao({ municipioId: id });
   };
 
+  const idsFaixaSelecionada = useMemo(() => {
+    if (!faixaSelecionada) return null;
+    const set = new Set<number>();
+    if (faixaSelecionada === "sem_avaliacao") {
+      for (const m of municipios) {
+        if (!indicesPorMunicipio.has(m.id)) {
+          set.add(m.id);
+        }
+      }
+    } else {
+      for (const ind of indices) {
+        if (classificar(ind.nota_final).faixa === faixaSelecionada) {
+          set.add(ind.municipio_id);
+        }
+      }
+    }
+    return set;
+  }, [faixaSelecionada, indices, municipios, indicesPorMunicipio]);
+
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!mapLoaded || !map || !map.getLayer("municipios-fill")) return;
+
+    if (!idsFaixaSelecionada) {
+      map.setFilter("municipios-fill", null);
+      const idsAvaliados = indices.map((i) => i.municipio_id);
+      if (map.getLayer("municipios-glow")) {
+        if (idsAvaliados.length > 0) {
+          const filtroGlow: unknown[] = [
+            "match",
+            ["to-number", ["get", "codarea"]],
+          ];
+          for (const id of idsAvaliados) filtroGlow.push(id, true);
+          filtroGlow.push(false);
+          map.setFilter("municipios-glow", filtroGlow as never);
+        } else {
+          map.setFilter("municipios-glow", FILTRO_VAZIO);
+        }
+      }
+      return;
+    }
+
+    const arrayIds = Array.from(idsFaixaSelecionada);
+    if (arrayIds.length === 0) {
+      map.setFilter("municipios-fill", FILTRO_VAZIO);
+      if (map.getLayer("municipios-glow")) {
+        map.setFilter("municipios-glow", FILTRO_VAZIO);
+      }
+      return;
+    }
+
+    const filtroMatch: unknown[] = [
+      "match",
+      ["to-number", ["get", "codarea"]],
+    ];
+    for (const id of arrayIds) filtroMatch.push(id, true);
+    filtroMatch.push(false);
+
+    map.setFilter("municipios-fill", filtroMatch as never);
+    if (map.getLayer("municipios-glow")) {
+      map.setFilter("municipios-glow", filtroMatch as never);
+    }
+  }, [mapLoaded, idsFaixaSelecionada, indices]);
+
   return (
     <>
       <div
@@ -445,6 +513,8 @@ export function BahiaMap({ indices, municipios }: BahiaMapProps) {
         municipios={municipios}
         municipioSelecionadoId={selecao?.municipioId ?? null}
         onSelectMunicipio={selecionarMunicipio}
+        faixaSelecionada={faixaSelecionada}
+        onSelectFaixa={setFaixaSelecionada}
       />
       {selecao && (
         <MunicipioCard
