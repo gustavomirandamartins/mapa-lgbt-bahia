@@ -55,10 +55,10 @@ const FULL_WORLD_OCEAN: GeoJSON.FeatureCollection = {
   ],
 };
 
-/** Bounding box do estado da Bahia. */
+/** Bounding box do estado da Bahia (ampliado para visualização completa sem cortes). */
 const BAHIA_BOUNDS: [[number, number], [number, number]] = [
-  [-46.62, -18.35],
-  [-37.34, -8.53],
+  [-47.45, -19.05],
+  [-36.65, -7.75],
 ];
 
 const FILTRO_VAZIO = ["==", ["to-number", ["get", "codarea"]], -1] as never;
@@ -102,7 +102,7 @@ export function BahiaMap({ indices, municipios }: BahiaMapProps) {
       container: containerRef.current,
       style: ESTILO_LOCAL,
       bounds: BAHIA_BOUNDS,
-      fitBoundsOptions: { padding: 24 },
+      fitBoundsOptions: { padding: 50 },
       maxBounds: [
         [-50.5, -21.5],
         [-33.5, -5.5],

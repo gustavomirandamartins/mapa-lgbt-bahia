@@ -59,8 +59,8 @@ export default async function AdminPage() {
       <div className="mx-auto flex max-w-3xl flex-col gap-5">
         {/* Header */}
         <header className="glass flex items-center justify-between gap-3 rounded-3xl px-5 py-4">
-          <div className="flex items-center gap-3">
-            <PrideLogo size={40} />
+          <div className="flex items-center gap-3.5">
+            <PrideLogo size={52} />
             <div>
               <p className="text-sm font-extrabold tracking-tight">
                 Administração · IDT-LGBT

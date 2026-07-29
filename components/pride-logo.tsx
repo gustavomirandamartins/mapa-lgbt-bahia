@@ -6,7 +6,7 @@ const ICON_URL =
 export function PrideLogo({ size = 40 }: { size?: number }) {
   return (
     <span
-      className="inline-flex shrink-0 items-center justify-center overflow-hidden rounded-2xl shadow-sm"
+      className="inline-flex shrink-0 items-center justify-center"
       style={{ width: size, height: size }}
     >
       <Image

@@ -27,7 +27,7 @@ export default async function CadastroPage() {
         innerClassName="glass-strong rounded-[2rem] p-8"
       >
         <div className="mb-8 flex flex-col items-center text-center">
-          <PrideLogo size={56} />
+          <PrideLogo size={76} />
           <h1 className="mt-4 text-2xl font-bold tracking-tight">
             Cadastro de Município
           </h1>

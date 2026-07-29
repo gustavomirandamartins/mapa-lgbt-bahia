@@ -17,12 +17,10 @@ export default function LoginPage() {
     <main className="app-backdrop flex min-h-dvh flex-col items-center justify-center px-4 py-10">
       <div className="neuro-card w-full max-w-md rounded-[2.5rem] p-8 sm:p-10">
         <div className="mb-8 flex flex-col items-center text-center">
-          <div className="neuro-rainbow-ring mb-2">
-            <div className="flex size-16 items-center justify-center rounded-full bg-[#eef1f7]">
-              <PrideLogo size={42} />
-            </div>
+          <div className="mb-3">
+            <PrideLogo size={88} />
           </div>
-          <h1 className="mt-2 text-2xl font-extrabold tracking-tight text-[#2c3444]">
+          <h1 className="mt-1 text-2xl font-extrabold tracking-tight text-[#2c3444]">
             Central de Controle
           </h1>
           <p className="mt-1 text-xs font-semibold text-[#64748b]">
