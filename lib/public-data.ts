@@ -35,10 +35,13 @@ export async function getIndicesPublicos(): Promise<IndicePublico[]> {
     const { data, error } = await createAnonClient()
       .from("indice_publico")
       .select("municipio_id, nome, nota_final, classificacao, notas_eixos, respostas, submitted_at");
-    if (error) return [];
+    if (error) {
+      console.error("Erro em getIndicesPublicos (Supabase):", error.message, error.details, error.hint);
+      return [];
+    }
     return (data ?? []) as IndicePublico[];
-  } catch {
-    // Sem Supabase configurado ainda: mapa renderiza sem dados.
+  } catch (err) {
+    console.error("Exceção em getIndicesPublicos:", err);
     return [];
   }
 }

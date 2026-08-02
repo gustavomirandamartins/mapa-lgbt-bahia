@@ -3,12 +3,7 @@
 -- Plataforma de Mapeamento do Turismo LGBTQIAPN+ Municipal
 -- ============================================================================
 
--- 1. Remove os dados atuais dos municípios de Salvador (IBGE 2927408)
---    e Alagoinhas (IBGE 2900702) conforme solicitado na transição metodológica.
-delete from public.avaliacoes
-where municipio_id in (2927408, 2900702);
-
--- 2. Recria a view indice_publico com a coluna "respostas"
+-- 1. Recria a view indice_publico com a coluna "respostas"
 --    para que o público em geral e o mapa interativo possam acessar
 --    e consultar todas as respostas de mapeamento enviadas por cada município.
 drop view if exists public.indice_publico;
