@@ -85,6 +85,8 @@ export async function aprovarAvaliacao(
     .from("avaliacoes")
     .update({
       status: "aprovado",
+      nota_final: 100,
+      classificacao: "Mapeado",
       reviewed_by: user.id,
       reviewed_at: new Date().toISOString(),
     })
@@ -93,9 +95,9 @@ export async function aprovarAvaliacao(
 
   if (error) return { error: `Erro ao aprovar: ${error.message}` };
 
-  revalidatePath("/admin");
-  revalidatePath("/painel");
-  revalidatePath("/");
+  revalidatePath("/", "layout");
+  revalidatePath("/admin", "layout");
+  revalidatePath("/painel", "layout");
   return { error: null, sucesso: "Avaliação aprovada e publicada no mapa." };
 }
 

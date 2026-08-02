@@ -92,6 +92,20 @@ export function BahiaMap({ indices, municipios }: BahiaMapProps) {
     return mapa;
   }, [municipios]);
 
+  const obterCorPreenchimento = (listaIndices: IndicePublico[]) => {
+    const COR_PADRAO_MAPA = COR_SEM_DADOS;
+    if (listaIndices.length === 0) return COR_PADRAO_MAPA;
+    const expressao: unknown[] = [
+      "match",
+      ["to-number", ["get", "codarea"]],
+    ];
+    for (const indice of listaIndices) {
+      expressao.push(indice.municipio_id, "#10b981");
+    }
+    expressao.push(COR_PADRAO_MAPA);
+    return expressao;
+  };
+
   useEffect(() => {
     if (!containerRef.current || mapRef.current) return;
 
@@ -143,19 +157,7 @@ export function BahiaMap({ indices, municipios }: BahiaMapProps) {
         }
       }
 
-      const COR_PADRAO_MAPA = COR_SEM_DADOS;
-      let corPreenchimento: unknown = COR_PADRAO_MAPA;
-      if (indices.length > 0) {
-        const expressao: unknown[] = [
-          "match",
-          ["to-number", ["get", "codarea"]],
-        ];
-        for (const indice of indices) {
-          expressao.push(indice.municipio_id, corDaNota(indice.nota_final));
-        }
-        expressao.push(COR_PADRAO_MAPA);
-        corPreenchimento = expressao;
-      }
+      const corPreenchimento = obterCorPreenchimento(indices);
 
       // Layer 1. Oceano (superfície única Neumorphism semi-transparente para o gradiente ambiental)
       map.addSource("ocean-source", { type: "geojson", data: FULL_WORLD_OCEAN });
@@ -374,6 +376,14 @@ export function BahiaMap({ indices, municipios }: BahiaMapProps) {
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Atualiza as cores do mapa dinamicamente sempre que a lista de municípios mapeados for alterada
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !mapLoaded || !map.getLayer("municipios-fill")) return;
+    const corPreenchimento = obterCorPreenchimento(indices);
+    map.setPaintProperty("municipios-fill", "fill-color", corPreenchimento as never);
+  }, [mapLoaded, indices]);
 
   const indiceSelecionado = selecao
     ? (indicesPorMunicipio.get(selecao.municipioId) ?? null)

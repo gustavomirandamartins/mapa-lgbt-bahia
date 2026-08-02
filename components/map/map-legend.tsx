@@ -61,7 +61,7 @@ export function MapLegend({
           return !ind;
         }
         if (!ind) return false;
-        return classificar(ind.nota_final).faixa === faixaSelecionada;
+        return faixaSelecionada === "Com Respostas" || faixaSelecionada === "Mapeado" || classificar(ind.nota_final).faixa === faixaSelecionada;
       });
     }
     if (!busca.trim()) return lista;

@@ -5,7 +5,7 @@ import { getIndicesPublicos, getMunicipios } from "@/lib/public-data";
 import { BahiaMap } from "@/components/map/bahia-map";
 import { PrideLogo } from "@/components/pride-logo";
 
-export const revalidate = 60;
+export const revalidate = 0;
 
 export default async function HomePage() {
   const [indices, municipios] = await Promise.all([

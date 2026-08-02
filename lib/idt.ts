@@ -92,12 +92,18 @@ export const CLASSIFICACOES: IdtClassificacao[] = [
 
 export const COR_SEM_DADOS = "#94a3b8";
 
-export function classificar(notaFinal: number): IdtClassificacao {
-  return notaFinal > 0 ? CLASSIFICACOES[0] : CLASSIFICACOES[1];
+export function classificar(notaFinal?: number | null): IdtClassificacao {
+  if (notaFinal === undefined || notaFinal === null || notaFinal > 0) {
+    return CLASSIFICACOES[0];
+  }
+  return CLASSIFICACOES[1];
 }
 
-export function corDaNota(notaFinal: number): string {
-  return classificar(notaFinal).cor;
+export function corDaNota(notaFinal?: number | null): string {
+  if (notaFinal === undefined || notaFinal === null || notaFinal > 0) {
+    return CLASSIFICACOES[0].cor; // "#10b981" - Verde Mapeado
+  }
+  return CLASSIFICACOES[1].cor;
 }
 
 // ----------------------------------------------------------------------------
