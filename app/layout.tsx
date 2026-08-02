@@ -13,10 +13,10 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  applicationName: "PLATUR-LGBT+ Bahia",
+  applicationName: "Turismo LGBTQIAPN+ na Bahia",
   title: {
-    default: "PLATUR-LGBT+ · Plataforma de Mapeamento do Turismo LGBTQIAPN+ Municipal na Bahia",
-    template: "%s · PLATUR-LGBT+ Bahia",
+    default: "Plataforma de Mapeamento do Turismo LGBTQIAPN+ Municipal na Bahia",
+    template: "%s · Turismo LGBTQIAPN+ na Bahia",
   },
   description:
     "Plataforma de Mapeamento do Turismo LGBTQIAPN+ Municipal dos 417 municípios da Bahia. Uma tecnologia de gestão social da SETUR-BA.",

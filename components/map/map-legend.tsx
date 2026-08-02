@@ -155,7 +155,7 @@ export function MapLegend({
       {/* 1. Legenda Desktop (Neumorphic Card com busca e lista de rolagem) */}
       <div className="pointer-events-auto neuro-card fixed bottom-6 left-6 z-20 hidden max-h-[calc(100dvh-5rem)] w-[18.5rem] flex-col rounded-[2.2rem] p-5 sm:flex">
         <h3 className="mb-3 text-center text-base font-extrabold tracking-tight text-[#1e293b]">
-          PLATUR-LGBT+ · Mapeamento
+          Mapeamento dos Municípios
         </h3>
 
         {/* Pílulas de status (Mapeado vs Não Mapeado) clicáveis para filtrar */}
@@ -225,7 +225,7 @@ export function MapLegend({
           <div className="neuro-card flex max-h-[85dvh] w-full flex-col rounded-t-[2.5rem] p-6 pb-8 shadow-2xl">
             <div className="mb-4 flex items-center justify-between">
               <h3 className="text-base font-extrabold tracking-tight text-[#1e293b]">
-                PLATUR-LGBT+ · {listaMunicipios.length} Municípios
+                {listaMunicipios.length} Municípios
               </h3>
               <button
                 type="button"

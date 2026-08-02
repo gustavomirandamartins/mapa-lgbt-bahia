@@ -114,7 +114,7 @@ export function QuestionnaireWizard({ nomeMunicipio }: { nomeMunicipio: string }
       {/* Cabeçalho e progresso */}
       <div className="mb-5">
         <p className="text-[11px] font-semibold tracking-widest text-neutral-400 uppercase">
-          Questionário PLATUR-LGBT+ · {nomeMunicipio}
+          Questionário · {nomeMunicipio}
         </p>
         <div className="mt-2 flex items-center gap-3">
           <div className="h-2 flex-1 overflow-hidden rounded-full bg-neutral-200/70">
