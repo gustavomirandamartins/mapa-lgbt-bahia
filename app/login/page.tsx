@@ -24,7 +24,7 @@ export default function LoginPage() {
             Central de Controle
           </h1>
           <p className="mt-1 text-xs font-semibold text-[#64748b]">
-            Plataforma de Mapeamento do Turismo LGBTQIAPN+ Municipal · Bahia
+            Plataforma de Mapeamento do Turismo LGBTQIAPN+ Municipal na Bahia
           </p>
         </div>
 

@@ -23,7 +23,7 @@ export default async function HomePage() {
           <PrideLogo size={46} />
           <div>
             <h1 className="text-lg leading-tight font-extrabold tracking-tight text-[#2c3444] sm:text-xl">
-              Turismo <span className="pride-text">LGBTQIAPN+</span> · Bahia
+              Turismo <span className="pride-text">LGBTQIAPN+</span> na Bahia
             </h1>
             <p className="text-[11px] leading-tight font-semibold text-[#64748b] sm:text-xs">
               Plataforma de Mapeamento do Turismo LGBTQIAPN+ Municipal
