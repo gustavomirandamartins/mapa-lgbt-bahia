@@ -29,7 +29,7 @@ import { DashboardClient } from "@/components/dashboard/dashboard-client";
 export const metadata: Metadata = {
   title: "Dashboard — Plataforma de Mapeamento do Turismo LGBTQIAPN+ Municipal",
   description:
-    "Panorama dos resultados do mapeamento do Turismo LGBTQIAPN+ nos municípios da Bahia — SETUR-BA.",
+    "Panorama dos resultados do mapeamento do Turismo LGBTQIAPN+ nos municípios da Bahia.",
 };
 
 export const revalidate = 0;
@@ -129,7 +129,7 @@ export default async function DashboardPage() {
         {/* ────────────── Footer ────────────── */}
         <footer className="border-t border-[#cbd5e1]/30 pt-6 pb-10 text-center">
           <p className="text-xs font-medium text-[#94a3b8]">
-            Plataforma de Mapeamento do Turismo LGBTQIAPN+ Municipal — SETUR-BA
+            Plataforma de Mapeamento do Turismo LGBTQIAPN+ Municipal
           </p>
           <p className="mt-1 text-[10px] text-[#b4bcd0]">
             {estatisticas.totalMapeados} de {TOTAL_MUNICIPIOS_BA} municípios mapeados

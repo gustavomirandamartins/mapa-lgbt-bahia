@@ -124,8 +124,8 @@ export default async function PainelPage() {
               Cadastro não aprovado
             </h1>
             <p className="mx-auto mt-2 max-w-sm text-sm text-neutral-500">
-              Entre em contato com a SETUR-BA para mais informações sobre o
-              acesso à plataforma.
+              Entre em contato com a administração da plataforma para mais
+              informações sobre o acesso.
             </p>
           </section>
         )}

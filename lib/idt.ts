@@ -1,6 +1,5 @@
 // ============================================================================
 // Metodologia TGS-DT: Plataforma de Mapeamento do Turismo LGBTQIAPN+ Municipal
-// (SETUR-BA)
 //
 // Módulo autocontido e sem dependências de runtime para poder ser executado
 // tanto no Next.js (client e server) quanto no Node.js puro (testes).
@@ -357,7 +356,7 @@ export const IDT_QUESTIONARIO: IdtEixo[] = [
         texto: "26. Quem promoveu as capacitações?",
         tipo: "checkbox",
         opcoes: [
-          { valor: "SETUR-BA", rotulo: "SETUR-BA" },
+          { valor: "Secretaria Estadual de Turismo", rotulo: "Secretaria Estadual de Turismo" },
           { valor: "Ministério do Turismo", rotulo: "Ministério do Turismo" },
           { valor: "Prefeitura", rotulo: "Prefeitura" },
           { valor: "Sebrae", rotulo: "Sebrae" },

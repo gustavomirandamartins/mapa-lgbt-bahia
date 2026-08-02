@@ -7,7 +7,7 @@ This version has breaking changes — APIs, conventions, and file structure may 
 # IDT-LGBT Bahia — Mapa do Turismo LGBTQIAPN+
 
 Aplicativo full-stack mobile-first (PWA) do Índice de Desenvolvimento do
-Turismo LGBTQIAPN+ (IDT-LGBT) dos 417 municípios da Bahia — SETUR-BA.
+Turismo LGBTQIAPN+ (IDT-LGBT) dos 417 municípios da Bahia.
 
 ## Stack
 

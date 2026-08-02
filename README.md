@@ -7,7 +7,7 @@
 [![Supabase](https://img.shields.io/badge/Supabase-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white)](https://supabase.com/)
 [![MapLibre GL](https://img.shields.io/badge/MapLibre%20GL-3178C6?style=for-the-badge&logo=maplibre&logoColor=white)](https://maplibre.org/)
 
-Aplicativo full-stack mobile-first (PWA) para mapeamento, acompanhamento e exibição pública do **Índice de Desenvolvimento do Turismo LGBTQIAPN+ (IDT-LGBT)** nos **417 municípios do Estado da Bahia**, desenvolvido para a **Secretaria de Turismo do Estado da Bahia (SETUR-BA)**.
+Aplicativo full-stack mobile-first (PWA) para mapeamento, acompanhamento e exibição pública do **Índice de Desenvolvimento do Turismo LGBTQIAPN+ (IDT-LGBT)** nos **417 municípios do Estado da Bahia**.
 
 ---
 
@@ -17,7 +17,7 @@ O **IDT-LGBT Bahia** é uma plataforma que conecta gestão pública municipal, c
 
 - **Mapa Coroplético Interativo (100% Local)**: Visualização cartográfica dos 417 municípios da Bahia utilizando geometrias oficiais do IBGE, coloridas de acordo com a maturidade turística LGBTQIAPN+ e renderizadas em MapLibre GL sem dependência de tiles externos.
 - **Transparência e Raio-X Municipal**: Cards de detalhe com gráfico de radar (desempenho nos 7 eixos), destaques para pontos fortes, fragilidades e recomendações de políticas públicas.
-- **Central de Controle (Gestores Municipais e SETUR-BA)**: Painéis autenticados para submissão de questionário municipal, fluxo de revisão, moderação e aprovação de avaliações.
+- **Central de Controle (Gestores Municipais e Administração)**: Painéis autenticados para submissão de questionário municipal, fluxo de revisão, moderação e aprovação de avaliações.
 
 ---
 
@@ -66,9 +66,9 @@ O questionário oficial abrange 35 perguntas distribuídas em 7 eixos temáticos
 ## 🔄 Fluxo de Governança e Moderação
 
 1. **Cadastro Municipal (`pendente`)**: O representante municipal cria conta vinculando-se a um dos 417 municípios em `/cadastro`.
-2. **Aprovação de Perfil (`aprovado`)**: A SETUR-BA revisa e autoriza o gestor municipal através do painel administrativo (`/admin`).
-3. **Submissão do Questionário (`pendente`)**: O gestor aprovado responde às 35 perguntas no assistente (`/painel/questionario`). O cálculo é realizado no servidor.
-4. **Publicação no Mapa (`aprovado`)**: A SETUR-BA analisa a avaliação em `/admin/avaliacoes/[id]`. Ao ser aprovada, a avaliação torna-se pública no mapa e substitui automaticamente a versão anterior (`substituida`).
+2. **Aprovação de Perfil (`aprovado`)**: A administração revisa e autoriza o gestor municipal através do painel administrativo (`/admin`).
+3. **Submissão da Avaliação (`pendente`)**: O gestor municipal autenticado responde ao questionário com os 7 eixos em `/painel`.
+4. **Publicação no Mapa (`aprovado`)**: A administração analisa a avaliação em `/admin/avaliacoes/[id]`. Ao ser aprovada, a avaliação torna-se pública no mapa e substitui automaticamente a versão anterior (`substituida`).
 
 ---
 
@@ -76,7 +76,7 @@ O questionário oficial abrange 35 perguntas distribuídas em 7 eixos temáticos
 
 ```text
 ├── app/                      # Rotas da aplicação (Next.js 16 App Router)
-│   ├── admin/                # Central de administração (SETUR-BA)
+│   ├── admin/                # Central de administração
 │   ├── cadastro/             # Cadastro de gestores municipais
 │   ├── login/                # Autenticação (Supabase Auth)
 │   ├── painel/               # Painel do município e questionário IDT
@@ -86,7 +86,7 @@ O questionário oficial abrange 35 perguntas distribuídas em 7 eixos temáticos
 │   ├── map/                  # Mapa MapLibre GL, card municipal, legenda e gráfico radar
 │   ├── questionnaire/        # Wizard interativo de 35 perguntas
 │   └── ui/                   # Cards, logotipos e elementos de UI
-├── docs/                     # Documentação oficial da metodologia SETUR-BA
+├── docs/                     # Documentação oficial da metodologia
 ├── lib/                      # Lógica de negócios e integrações
 │   ├── actions/              # Next.js Server Actions (auth, avaliações, admin)
 │   ├── idt.ts                # Motor de cálculo do IDT-LGBT (módulo universal)
@@ -180,4 +180,4 @@ A suíte em `lib/idt.test.ts` valida:
 
 ## 📜 Licença e Institucional
 
-Projeto desenvolvido para a **Secretaria de Turismo do Estado da Bahia (SETUR-BA)** para fortalecimento, transparência e planejamento do turismo LGBTQIAPN+ no Estado da Bahia.
+Projeto desenvolvido para fortalecimento, transparência e planejamento do turismo LGBTQIAPN+ no Estado da Bahia.

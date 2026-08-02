@@ -80,12 +80,12 @@ export function MunicipioCard({ id, nome, indice, onClose }: MunicipioCardProps)
           </button>
         </div>
 
-        {/* Dados do IBGE e Zona Turística SETUR */}
+        {/* Dados do IBGE e Zona Turística */}
         {dadosIbge && (
           <div className="neuro-inset mb-5 rounded-2xl p-4">
             <div className="mb-2.5 flex items-center justify-between border-b border-[#e2e8f0] pb-2">
               <span className="text-[11px] font-extrabold tracking-wider text-[#64748b] uppercase">
-                Zona Turística (SETUR)
+                Zona Turística
               </span>
               <span className="rounded-full bg-[#2c3444] px-2.5 py-0.5 text-xs font-extrabold text-white">
                 {dadosIbge.zonaTuristica}
@@ -134,7 +134,7 @@ export function MunicipioCard({ id, nome, indice, onClose }: MunicipioCardProps)
               </div>
             </div>
             <p className="mt-2 text-right text-[10px] font-semibold text-[#64748b]">
-              Fonte: IBGE / SETUR-BA
+              Fonte: IBGE
             </p>
           </div>
         )}

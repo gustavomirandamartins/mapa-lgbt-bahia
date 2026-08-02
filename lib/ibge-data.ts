@@ -1,5 +1,5 @@
 /**
- * Dados oficiais do IBGE (Censo 2022 / Cadastro Municipal) e Zonas Turísticas da SETUR-BA
+ * Dados oficiais do IBGE (Censo 2022 / Cadastro Municipal) e Zonas Turísticas
  * dos 417 municípios da Bahia.
  *
  * Permite visualização imediata e funcionamento 100% offline no PWA.

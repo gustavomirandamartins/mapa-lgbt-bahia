@@ -5,7 +5,7 @@ export default function manifest(): MetadataRoute.Manifest {
     name: "Plataforma de Mapeamento do Turismo LGBTQIAPN+ Municipal",
     short_name: "Plataforma de Mapeamento do Turismo LGBTQIAPN+ Municipal",
     description:
-      "Plataforma de Mapeamento do Turismo LGBTQIAPN+ dos municípios da Bahia (SETUR-BA).",
+      "Plataforma de Mapeamento do Turismo LGBTQIAPN+ dos municípios da Bahia.",
     lang: "pt-BR",
     start_url: "/",
     scope: "/",

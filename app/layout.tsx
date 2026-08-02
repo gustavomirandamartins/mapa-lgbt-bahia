@@ -19,7 +19,7 @@ export const metadata: Metadata = {
     template: "%s · Turismo LGBTQIAPN+ na Bahia",
   },
   description:
-    "Plataforma de Mapeamento do Turismo LGBTQIAPN+ Municipal dos 417 municípios da Bahia. Uma tecnologia de gestão social da SETUR-BA.",
+    "Plataforma de Mapeamento do Turismo LGBTQIAPN+ Municipal dos 417 municípios da Bahia. Uma tecnologia de gestão social.",
   icons: {
     icon: [
       {
