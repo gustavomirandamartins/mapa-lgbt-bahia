@@ -8,8 +8,9 @@ import {
   type StyleSpecification,
 } from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
+import { Maximize } from "lucide-react";
 
-import { COR_SEM_DADOS, corDaNota, classificar } from "@/lib/idt";
+import { COR_SEM_DADOS, classificar } from "@/lib/idt";
 import type { IndicePublico } from "@/lib/public-data";
 import type { Municipio } from "@/lib/auth-guards";
 import { MunicipioCard } from "@/components/map/municipio-card";
@@ -483,13 +484,11 @@ export function BahiaMap({ indices, municipios }: BahiaMapProps) {
           setSelecao(null);
           mapRef.current?.fitBounds(BAHIA_BOUNDS, { padding: 50, duration: 800 });
         }}
-        className="pointer-events-auto neuro-card fixed right-4 bottom-24 z-20 flex items-center gap-2 rounded-2xl px-4 py-2.5 text-xs font-bold text-[#2c3444] shadow-md transition-transform active:scale-95 sm:right-6 sm:bottom-28"
-        title="Ver toda a Bahia"
+        className="pointer-events-auto neuro-card fixed right-3 bottom-24 z-20 flex size-9 items-center justify-center rounded-xl text-[#2c3444] shadow-md transition-all hover:text-[#1880fb] active:scale-95 sm:right-6 sm:bottom-28"
+        title="Zoom Extents"
+        aria-label="Zoom Extents"
       >
-        <span className="flex size-5 items-center justify-center rounded-full bg-[#eef1f7] shadow-[inset_-1px_-1px_2px_rgba(255,255,255,0.9),inset_1px_1px_2px_rgba(178,190,214,0.45)]">
-          🌐
-        </span>
-        <span>Ver toda a Bahia</span>
+        <Maximize className="size-4.5" />
       </button>
       {selecao && (
         <MunicipioCard
