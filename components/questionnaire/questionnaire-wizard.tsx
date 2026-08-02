@@ -20,7 +20,7 @@ import {
 import { submeterAvaliacao } from "@/lib/actions/avaliacao";
 
 /**
- * Wizard do questionário PLATUR-LGBT+: 7 etapas (uma por eixo), mobile-first.
+ * Wizard do questionário da Plataforma de Mapeamento do Turismo LGBTQIAPN+ Municipal: 7 etapas (uma por eixo), mobile-first.
  * Suporta perguntas do tipo rádio (sim/não/opções), múltipla escolha (checkbox) e texto livre.
  */
 export function QuestionnaireWizard({ nomeMunicipio }: { nomeMunicipio: string }) {
@@ -92,7 +92,7 @@ export function QuestionnaireWizard({ nomeMunicipio }: { nomeMunicipio: string }
           Mapeamento enviado!
         </h1>
         <p className="mt-2 text-sm text-neutral-600">
-          Suas respostas ao PLATUR-LGBT+ foram registradas e aguardam a revisão do
+          Suas respostas à Plataforma de Mapeamento do Turismo LGBTQIAPN+ Municipal foram registradas e aguardam a revisão do
           administrador para serem publicadas no mapa interativo da Bahia.
         </p>
         <div className="mx-auto mt-6 flex w-fit items-center gap-2 rounded-full bg-[#10b981] px-5 py-2.5 text-white shadow-lg">

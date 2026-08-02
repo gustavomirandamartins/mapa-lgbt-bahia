@@ -17,7 +17,7 @@ import {
 } from "@/lib/idt";
 import { AdminActions } from "@/components/admin-actions";
 
-export const metadata: Metadata = { title: "Revisão de Avaliação - PLATUR-LGBT+" };
+export const metadata: Metadata = { title: "Revisão de Avaliação - Plataforma de Mapeamento do Turismo LGBTQIAPN+ Municipal" };
 
 export const dynamic = "force-dynamic";
 
@@ -74,7 +74,7 @@ export default async function AvaliacaoDetalhePage({
           </div>
           <div className="min-w-0 flex-1">
             <p className="text-[11px] font-semibold tracking-widest text-neutral-400 uppercase">
-              Revisão de Mapeamento · PLATUR-LGBT+
+              Revisão de Mapeamento · Plataforma de Mapeamento do Turismo LGBTQIAPN+ Municipal
             </p>
             <h1 className="text-xl leading-tight font-bold tracking-tight">
               {avaliacao.municipios?.nome}

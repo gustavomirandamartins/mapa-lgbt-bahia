@@ -17,7 +17,7 @@ export interface MapLegendProps {
 }
 
 /**
- * Legenda das faixas do PLATUR-LGBT+ exibida sobre o mapa, equipada com busca
+ * Legenda das faixas da Plataforma de Mapeamento do Turismo LGBTQIAPN+ Municipal exibida sobre o mapa, equipada com busca
  * de cidades e lista de rolagem dos 417 municípios da Bahia com status colorido.
  */
 export function MapLegend({

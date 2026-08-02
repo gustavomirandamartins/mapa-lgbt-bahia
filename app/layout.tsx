@@ -41,7 +41,7 @@ export const metadata: Metadata = {
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
-    title: "PLATUR-LGBT+",
+    title: "Plataforma de Mapeamento do Turismo LGBTQIAPN+ Municipal",
   },
   formatDetection: { telephone: false },
 };

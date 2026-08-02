@@ -3,7 +3,7 @@ import type { MetadataRoute } from "next";
 export default function manifest(): MetadataRoute.Manifest {
   return {
     name: "Plataforma de Mapeamento do Turismo LGBTQIAPN+ Municipal",
-    short_name: "PLATUR-LGBT+",
+    short_name: "Plataforma de Mapeamento do Turismo LGBTQIAPN+ Municipal",
     description:
       "Plataforma de Mapeamento do Turismo LGBTQIAPN+ dos municípios da Bahia (SETUR-BA).",
     lang: "pt-BR",

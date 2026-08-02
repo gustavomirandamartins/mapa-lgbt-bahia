@@ -1,6 +1,6 @@
 // ============================================================================
 // Metodologia TGS-DT: Plataforma de Mapeamento do Turismo LGBTQIAPN+ Municipal
-// (PLATUR-LGBT+ Bahia — SETUR-BA)
+// (SETUR-BA)
 //
 // Módulo autocontido e sem dependências de runtime para poder ser executado
 // tanto no Next.js (client e server) quanto no Node.js puro (testes).

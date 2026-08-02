@@ -12,7 +12,7 @@ export interface SubmissaoState {
 }
 
 /**
- * Submete o questionário da Plataforma de Mapeamento do Turismo LGBTQIAPN+ Municipal (PLATUR-LGBT+).
+ * Submete o questionário da Plataforma de Mapeamento do Turismo LGBTQIAPN+ Municipal.
  * As respostas são salvas no formato nativo do questionário (sem cálculo de notas ou pesos).
  */
 export async function submeterAvaliacao(

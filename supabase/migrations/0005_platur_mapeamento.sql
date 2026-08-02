@@ -1,6 +1,6 @@
 -- ============================================================================
--- PLATUR-LGBT+ Bahia — Atualização da metodologia e view pública
 -- Plataforma de Mapeamento do Turismo LGBTQIAPN+ Municipal
+-- Atualização da metodologia e view pública
 -- ============================================================================
 
 -- 1. Recria a view indice_publico com a coluna "respostas"

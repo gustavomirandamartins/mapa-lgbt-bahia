@@ -10,7 +10,7 @@ import {
   type IdtRespostas,
 } from "./idt.ts";
 
-test("questionário oficial TGS-DT PLATUR-LGBT+: 7 eixos e 49 perguntas", () => {
+test("questionário oficial TGS-DT Plataforma de Mapeamento do Turismo LGBTQIAPN+ Municipal: 7 eixos e 49 perguntas", () => {
   assert.equal(IDT_QUESTIONARIO.length, 7);
   assert.equal(TOTAL_PERGUNTAS, 49);
 

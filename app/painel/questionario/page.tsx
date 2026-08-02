@@ -6,7 +6,7 @@ import { ArrowLeft } from "lucide-react";
 import { requireUser } from "@/lib/auth-guards";
 import { QuestionnaireWizard } from "@/components/questionnaire/questionnaire-wizard";
 
-export const metadata: Metadata = { title: "Questionário PLATUR-LGBT+" };
+export const metadata: Metadata = { title: "Questionário - Plataforma de Mapeamento do Turismo LGBTQIAPN+ Municipal" };
 
 export const dynamic = "force-dynamic";
 

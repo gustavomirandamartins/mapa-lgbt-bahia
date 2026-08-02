@@ -11,7 +11,7 @@ export function PrideLogo({ size = 40 }: { size?: number }) {
     >
       <Image
         src={ICON_URL}
-        alt="Logo IDT-LGBT Bahia"
+        alt="Logo Plataforma de Mapeamento do Turismo LGBTQIAPN+ Municipal"
         width={size}
         height={size}
         className="size-full object-contain"

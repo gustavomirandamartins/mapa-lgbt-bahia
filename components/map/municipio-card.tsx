@@ -32,7 +32,7 @@ function formatarData(iso: string): string {
 
 /**
  * Card do município (bottom sheet no mobile / painel flutuante no desktop),
- * exibindo as respostas completas aos 7 eixos do PLATUR-LGBT+.
+ * exibindo as respostas completas aos 7 eixos da Plataforma de Mapeamento do Turismo LGBTQIAPN+ Municipal.
  */
 export function MunicipioCard({ id, nome, indice, onClose }: MunicipioCardProps) {
   const [eixoAtivo, setEixoAtivo] = useState<IdtEixoId>("governanca");
@@ -227,7 +227,7 @@ export function MunicipioCard({ id, nome, indice, onClose }: MunicipioCardProps)
               <AlertCircle className="size-6" />
             </span>
             <p className="text-sm font-bold text-[#2c3444]">
-              Este município ainda não possui respostas publicadas no PLATUR-LGBT+.
+              Este município ainda não possui respostas publicadas na Plataforma de Mapeamento do Turismo LGBTQIAPN+ Municipal.
             </p>
             <p className="text-xs font-medium text-[#64748b]">
               O gestor municipal pode solicitar acesso na Central de Controle e

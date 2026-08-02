@@ -109,7 +109,7 @@ export default async function PainelPage() {
             </h1>
             <p className="mx-auto mt-2 max-w-sm text-sm text-neutral-500">
               O administrador vai revisar e aprovar seu cadastro. Assim que for
-              liberado, você poderá responder ao questionário PLATUR-LGBT+ de{" "}
+              liberado, você poderá responder ao questionário da Plataforma de Mapeamento do Turismo LGBTQIAPN+ Municipal de{" "}
               <strong>{municipio?.nome}</strong>.
             </p>
           </section>
@@ -147,7 +147,7 @@ export default async function PainelPage() {
                 </div>
                 <div>
                   <p className="text-[11px] font-semibold tracking-widest text-neutral-400 uppercase">
-                    PLATUR-LGBT+ publicado
+                    Plataforma de Mapeamento do Turismo LGBTQIAPN+ Municipal publicada
                   </p>
                   <p
                     className="text-lg leading-tight font-bold"
@@ -194,7 +194,7 @@ export default async function PainelPage() {
                   <p className="text-lg font-extrabold tracking-tight">
                     {publicada
                       ? "Responder nova avaliação"
-                      : "Responder o questionário PLATUR-LGBT+"}
+                      : "Responder o questionário da Plataforma de Mapeamento do Turismo LGBTQIAPN+ Municipal"}
                   </p>
                   <p className="text-sm opacity-90">
                     7 eixos · 49 perguntas · mapeamento municipal do turismo
