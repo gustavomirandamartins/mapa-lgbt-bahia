@@ -228,29 +228,6 @@ export function BahiaMap({ indices, municipios }: BahiaMapProps) {
         },
       });
 
-      // Layer 3.1 Glow neon para todos os municípios avaliados (cores vivas)
-      const idsAvaliados = indices.map((i) => i.municipio_id);
-      if (idsAvaliados.length > 0) {
-        const filtroGlow: unknown[] = [
-          "match",
-          ["to-number", ["get", "codarea"]],
-        ];
-        for (const id of idsAvaliados) filtroGlow.push(id, true);
-        filtroGlow.push(false);
-        map.addLayer({
-          id: "municipios-glow",
-          type: "line",
-          source: "municipios",
-          filter: filtroGlow as never,
-          paint: {
-            "line-color": corPreenchimento as never,
-            "line-width": 5,
-            "line-blur": 4,
-            "line-opacity": 0.95,
-          },
-        });
-      }
-
       map.addLayer({
         id: "municipios-line",
         type: "line",
@@ -259,19 +236,6 @@ export function BahiaMap({ indices, municipios }: BahiaMapProps) {
           "line-color": "#ffffff",
           "line-width": 1.2,
           "line-opacity": 0.9,
-        },
-      });
-
-      // Layer 4. Contorno da Bahia (bevel superior claro)
-      map.addLayer({
-        id: "contorno-glow",
-        type: "line",
-        source: "contorno",
-        paint: {
-          "line-color": "#ffffff",
-          "line-width": 12,
-          "line-blur": 8,
-          "line-opacity": 0.95,
         },
       });
       map.addLayer({
@@ -461,29 +425,12 @@ export function BahiaMap({ indices, municipios }: BahiaMapProps) {
 
     if (!idsFaixaSelecionada) {
       map.setFilter("municipios-fill", null);
-      const idsAvaliados = indices.map((i) => i.municipio_id);
-      if (map.getLayer("municipios-glow")) {
-        if (idsAvaliados.length > 0) {
-          const filtroGlow: unknown[] = [
-            "match",
-            ["to-number", ["get", "codarea"]],
-          ];
-          for (const id of idsAvaliados) filtroGlow.push(id, true);
-          filtroGlow.push(false);
-          map.setFilter("municipios-glow", filtroGlow as never);
-        } else {
-          map.setFilter("municipios-glow", FILTRO_VAZIO);
-        }
-      }
       return;
     }
 
     const arrayIds = Array.from(idsFaixaSelecionada);
     if (arrayIds.length === 0) {
       map.setFilter("municipios-fill", FILTRO_VAZIO);
-      if (map.getLayer("municipios-glow")) {
-        map.setFilter("municipios-glow", FILTRO_VAZIO);
-      }
       return;
     }
 
@@ -495,10 +442,7 @@ export function BahiaMap({ indices, municipios }: BahiaMapProps) {
     filtroMatch.push(false);
 
     map.setFilter("municipios-fill", filtroMatch as never);
-    if (map.getLayer("municipios-glow")) {
-      map.setFilter("municipios-glow", filtroMatch as never);
-    }
-  }, [mapLoaded, idsFaixaSelecionada, indices]);
+  }, [mapLoaded, idsFaixaSelecionada]);
 
   return (
     <>
