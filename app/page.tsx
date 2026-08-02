@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ShieldCheck } from "lucide-react";
+import { ShieldCheck, BarChart3 } from "lucide-react";
 
 import { getIndicesPublicos, getMunicipios } from "@/lib/public-data";
 import { BahiaMap } from "@/components/map/bahia-map";
@@ -31,15 +31,26 @@ export default async function HomePage() {
           </div>
         </div>
 
-        <Link
-          href="/login"
-          className="pointer-events-auto neuro-pill flex items-center gap-2.5 rounded-full px-5 py-3 text-xs font-bold text-[#2c3444] transition-transform active:scale-95 sm:text-sm"
-        >
-          <span className="flex size-6 items-center justify-center rounded-full bg-[#eef1f7] shadow-[inset_-2px_-2px_4px_rgba(255,255,255,0.9),inset_2px_2px_4px_rgba(178,190,214,0.45)]">
-            <ShieldCheck className="size-3.5 text-[#8b5cf6]" aria-hidden />
-          </span>
-          Central de Controle
-        </Link>
+        <div className="pointer-events-auto flex items-center gap-2">
+          <Link
+            href="/dashboard"
+            className="neuro-pill flex items-center gap-2.5 rounded-full px-5 py-3 text-xs font-bold text-[#2c3444] transition-transform active:scale-95 sm:text-sm"
+          >
+            <span className="flex size-6 items-center justify-center rounded-full bg-[#eef1f7] shadow-[inset_-2px_-2px_4px_rgba(255,255,255,0.9),inset_2px_2px_4px_rgba(178,190,214,0.45)]">
+              <BarChart3 className="size-3.5 text-[#10b981]" aria-hidden />
+            </span>
+            Dashboard
+          </Link>
+          <Link
+            href="/login"
+            className="neuro-pill flex items-center gap-2.5 rounded-full px-5 py-3 text-xs font-bold text-[#2c3444] transition-transform active:scale-95 sm:text-sm"
+          >
+            <span className="flex size-6 items-center justify-center rounded-full bg-[#eef1f7] shadow-[inset_-2px_-2px_4px_rgba(255,255,255,0.9),inset_2px_2px_4px_rgba(178,190,214,0.45)]">
+              <ShieldCheck className="size-3.5 text-[#8b5cf6]" aria-hidden />
+            </span>
+            Central de Controle
+          </Link>
+        </div>
       </header>
     </main>
   );
