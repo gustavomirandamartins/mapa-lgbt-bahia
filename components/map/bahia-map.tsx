@@ -165,7 +165,7 @@ export function BahiaMap({ indices, municipios }: BahiaMapProps) {
         source: "ocean-source",
         paint: {
           "fill-color": "#eef1f7",
-          "fill-opacity": 0.45,
+          "fill-opacity": 0.58,
         },
       });
 
@@ -177,7 +177,7 @@ export function BahiaMap({ indices, municipios }: BahiaMapProps) {
         source: "terra",
         paint: {
           "fill-color": "#eef1f7",
-          "fill-opacity": 0.55,
+          "fill-opacity": 0.40,
         },
       });
 
@@ -343,7 +343,12 @@ export function BahiaMap({ indices, municipios }: BahiaMapProps) {
           | [number, number]
           | undefined;
         if (centroide) {
-          map.easeTo({ center: centroide, duration: 450 });
+          map.flyTo({
+            center: centroide,
+            zoom: Math.max(map.getZoom(), 9.2),
+            duration: 750,
+            essential: true,
+          });
         }
 
         setSelecao({ municipioId });
@@ -390,10 +395,11 @@ export function BahiaMap({ indices, municipios }: BahiaMapProps) {
 
       const cent = centroidesRef.current.get(id);
       if (cent) {
-        map.easeTo({
+        map.flyTo({
           center: cent,
-          zoom: Math.max(map.getZoom(), 8.4),
-          duration: 500,
+          zoom: Math.max(map.getZoom(), 9.2),
+          duration: 750,
+          essential: true,
         });
       }
     }
@@ -460,8 +466,24 @@ export function BahiaMap({ indices, municipios }: BahiaMapProps) {
         faixaSelecionada={faixaSelecionada}
         onSelectFaixa={setFaixaSelecionada}
       />
+      <button
+        type="button"
+        onClick={() => {
+          mapRef.current?.setFilter("municipios-selecionado", FILTRO_VAZIO);
+          setSelecao(null);
+          mapRef.current?.fitBounds(BAHIA_BOUNDS, { padding: 50, duration: 800 });
+        }}
+        className="pointer-events-auto neuro-card fixed right-4 bottom-24 z-20 flex items-center gap-2 rounded-2xl px-4 py-2.5 text-xs font-bold text-[#2c3444] shadow-md transition-transform active:scale-95 sm:right-6 sm:bottom-28"
+        title="Ver toda a Bahia"
+      >
+        <span className="flex size-5 items-center justify-center rounded-full bg-[#eef1f7] shadow-[inset_-1px_-1px_2px_rgba(255,255,255,0.9),inset_1px_1px_2px_rgba(178,190,214,0.45)]">
+          🌐
+        </span>
+        <span>Ver toda a Bahia</span>
+      </button>
       {selecao && (
         <MunicipioCard
+          id={selecao.municipioId}
           nome={nomeSelecionado}
           indice={indiceSelecionado}
           onClose={() => {

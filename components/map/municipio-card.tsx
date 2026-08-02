@@ -11,8 +11,10 @@ import {
   type IdtValorResposta,
 } from "@/lib/idt";
 import type { IndicePublico } from "@/lib/public-data";
+import { DADOS_IBGE_BAHIA } from "@/lib/ibge-data";
 
 interface MunicipioCardProps {
+  id?: number;
   nome: string;
   indice: IndicePublico | null;
   onClose: () => void;
@@ -32,8 +34,14 @@ function formatarData(iso: string): string {
  * Card do município (bottom sheet no mobile / painel flutuante no desktop),
  * exibindo as respostas completas aos 7 eixos do PLATUR-LGBT+.
  */
-export function MunicipioCard({ nome, indice, onClose }: MunicipioCardProps) {
+export function MunicipioCard({ id, nome, indice, onClose }: MunicipioCardProps) {
   const [eixoAtivo, setEixoAtivo] = useState<IdtEixoId>("governanca");
+
+  const dadosIbge =
+    (id ? DADOS_IBGE_BAHIA[id] : undefined) ??
+    Object.values(DADOS_IBGE_BAHIA).find(
+      (m) => m.nome.toLowerCase() === nome.toLowerCase()
+    );
 
   const eixoSelecionado = IDT_QUESTIONARIO.find((e) => e.id === eixoAtivo) ?? IDT_QUESTIONARIO[0];
 
@@ -71,6 +79,65 @@ export function MunicipioCard({ nome, indice, onClose }: MunicipioCardProps) {
             <X className="size-4" />
           </button>
         </div>
+
+        {/* Dados do IBGE e Zona Turística SETUR */}
+        {dadosIbge && (
+          <div className="neuro-inset mb-5 rounded-2xl p-4">
+            <div className="mb-2.5 flex items-center justify-between border-b border-[#e2e8f0] pb-2">
+              <span className="text-[11px] font-extrabold tracking-wider text-[#64748b] uppercase">
+                Zona Turística (SETUR)
+              </span>
+              <span className="rounded-full bg-[#2c3444] px-2.5 py-0.5 text-xs font-extrabold text-white">
+                {dadosIbge.zonaTuristica}
+              </span>
+            </div>
+            <div className="grid grid-cols-2 gap-2 text-xs">
+              <div className="rounded-xl bg-white/60 p-2.5 shadow-xs">
+                <span className="block text-[10px] font-bold text-[#64748b] uppercase">
+                  População
+                </span>
+                <span className="font-extrabold text-[#2c3444]">
+                  {dadosIbge.populacao} hab.
+                </span>
+              </div>
+              <div className="rounded-xl bg-white/60 p-2.5 shadow-xs">
+                <span className="block text-[10px] font-bold text-[#64748b] uppercase">
+                  Área Total
+                </span>
+                <span className="font-extrabold text-[#2c3444]">
+                  {dadosIbge.areaKm2}
+                </span>
+              </div>
+              <div className="rounded-xl bg-white/60 p-2.5 shadow-xs">
+                <span className="block text-[10px] font-bold text-[#64748b] uppercase">
+                  PIB Municipal
+                </span>
+                <span className="font-extrabold text-[#2c3444]">
+                  {dadosIbge.pib}
+                </span>
+              </div>
+              <div className="rounded-xl bg-white/60 p-2.5 shadow-xs">
+                <span className="block text-[10px] font-bold text-[#64748b] uppercase">
+                  PIB per capita
+                </span>
+                <span className="font-extrabold text-[#2c3444]">
+                  {dadosIbge.pibPerCapita}
+                </span>
+              </div>
+              <div className="col-span-2 flex items-center justify-between rounded-xl bg-white/60 px-3 py-2 shadow-xs">
+                <span className="text-[10px] font-bold text-[#64748b] uppercase">
+                  IDH Municipal
+                </span>
+                <span className="font-extrabold text-[#2c3444]">
+                  {dadosIbge.idh}
+                </span>
+              </div>
+            </div>
+            <p className="mt-2 text-right text-[10px] font-semibold text-[#64748b]">
+              Fonte: IBGE / SETUR-BA
+            </p>
+          </div>
+        )}
 
         {indice ? (
           <>
