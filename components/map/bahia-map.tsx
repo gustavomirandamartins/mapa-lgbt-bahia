@@ -3,12 +3,11 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Map as MapLibreMap,
-  NavigationControl,
   setWorkerUrl,
   type StyleSpecification,
 } from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
-import { Maximize } from "lucide-react";
+import { Maximize, Minus, Plus } from "lucide-react";
 
 import { COR_SEM_DADOS, classificar } from "@/lib/idt";
 import type { IndicePublico } from "@/lib/public-data";
@@ -131,11 +130,6 @@ export function BahiaMap({ indices, municipios }: BahiaMapProps) {
       canvasContextAttributes: { preserveDrawingBuffer: true },
     });
     mapRef.current = map;
-
-    map.addControl(
-      new NavigationControl({ showCompass: false }),
-      "bottom-right"
-    );
 
     map.on("error", (event) => {
       // Glifos ausentes não quebram o mapa; outros erros vão para o console.
@@ -477,19 +471,43 @@ export function BahiaMap({ indices, municipios }: BahiaMapProps) {
         faixaSelecionada={faixaSelecionada}
         onSelectFaixa={setFaixaSelecionada}
       />
-      <button
-        type="button"
-        onClick={() => {
-          mapRef.current?.setFilter("municipios-selecionado", FILTRO_VAZIO);
-          setSelecao(null);
-          mapRef.current?.fitBounds(BAHIA_BOUNDS, { padding: 50, duration: 800 });
-        }}
-        className="pointer-events-auto neuro-card fixed right-3 bottom-24 z-20 flex size-9 items-center justify-center rounded-xl text-[#2c3444] shadow-md transition-all hover:text-[#1880fb] active:scale-95 sm:right-6 sm:bottom-28"
-        title="Zoom Extents"
-        aria-label="Zoom Extents"
+      <div
+        className="pointer-events-auto neuro-card fixed right-3 bottom-24 z-20 flex flex-col divide-y divide-[#cbd5e1]/40 rounded-xl shadow-lg sm:right-6 sm:bottom-28"
+        role="group"
+        aria-label="Controles de zoom e enquadramento"
       >
-        <Maximize className="size-4.5" />
-      </button>
+        <button
+          type="button"
+          onClick={() => mapRef.current?.zoomIn({ duration: 300 })}
+          className="flex size-9 items-center justify-center rounded-t-xl text-[#2c3444] transition-all hover:text-[#1880fb] active:scale-95"
+          title="Aproximar (+)"
+          aria-label="Aproximar zoom"
+        >
+          <Plus className="size-4.5" />
+        </button>
+        <button
+          type="button"
+          onClick={() => mapRef.current?.zoomOut({ duration: 300 })}
+          className="flex size-9 items-center justify-center text-[#2c3444] transition-all hover:text-[#1880fb] active:scale-95"
+          title="Afastar (-)"
+          aria-label="Afastar zoom"
+        >
+          <Minus className="size-4.5" />
+        </button>
+        <button
+          type="button"
+          onClick={() => {
+            mapRef.current?.setFilter("municipios-selecionado", FILTRO_VAZIO);
+            setSelecao(null);
+            mapRef.current?.fitBounds(BAHIA_BOUNDS, { padding: 50, duration: 800 });
+          }}
+          className="flex size-9 items-center justify-center rounded-b-xl text-[#2c3444] transition-all hover:text-[#1880fb] active:scale-95"
+          title="Zoom Extents (Ver toda a Bahia)"
+          aria-label="Zoom Extents"
+        >
+          <Maximize className="size-4.5" />
+        </button>
+      </div>
       {selecao && (
         <MunicipioCard
           id={selecao.municipioId}
