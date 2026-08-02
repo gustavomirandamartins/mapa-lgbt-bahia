@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, CheckCircle2 } from "lucide-react";
 
 import { requireAdmin } from "@/lib/auth-guards";
 import {
@@ -11,13 +11,13 @@ import {
 import {
   IDT_QUESTIONARIO,
   corDaNota,
+  formatarRespostaTexto,
   type IdtRespostas,
   type IdtResultadoEixo,
 } from "@/lib/idt";
 import { AdminActions } from "@/components/admin-actions";
-import { RadarChart } from "@/components/map/radar-chart";
 
-export const metadata: Metadata = { title: "Revisão de Avaliação" };
+export const metadata: Metadata = { title: "Revisão de Avaliação - PLATUR-LGBT+" };
 
 export const dynamic = "force-dynamic";
 
@@ -67,17 +67,14 @@ export default async function AvaliacaoDetalhePage({
         {/* Resumo */}
         <section className="glass-strong flex flex-wrap items-center gap-5 rounded-[2rem] p-6">
           <div
-            className="flex size-24 shrink-0 flex-col items-center justify-center rounded-[1.5rem] text-white shadow-lg"
+            className="flex size-20 shrink-0 flex-col items-center justify-center rounded-[1.5rem] text-white shadow-lg"
             style={{ backgroundColor: corDaNota(avaliacao.nota_final) }}
           >
-            <span className="text-3xl leading-none font-extrabold">
-              {Number(avaliacao.nota_final).toFixed(0)}
-            </span>
-            <span className="text-[10px] font-semibold opacity-90">/ 100</span>
+            <CheckCircle2 className="size-10" aria-hidden />
           </div>
           <div className="min-w-0 flex-1">
             <p className="text-[11px] font-semibold tracking-widest text-neutral-400 uppercase">
-              Revisão de avaliação
+              Revisão de Mapeamento · PLATUR-LGBT+
             </p>
             <h1 className="text-xl leading-tight font-bold tracking-tight">
               {avaliacao.municipios?.nome}
@@ -105,53 +102,31 @@ export default async function AvaliacaoDetalhePage({
           )}
         </section>
 
-        {/* Radar */}
-        <section className="glass rounded-[2rem] p-6">
-          <RadarChart
-            eixos={avaliacao.notas_eixos.map((eixo) => ({
-              nome: eixo.nome,
-              nomeCurto: eixo.nomeCurto,
-              percentual: eixo.percentual,
-            }))}
-            size={250}
-          />
-        </section>
-
         {/* Respostas por eixo */}
         {IDT_QUESTIONARIO.map((eixo) => {
-          const resultado = avaliacao.notas_eixos.find((r) => r.eixoId === eixo.id);
           return (
             <section key={eixo.id} className="glass rounded-[2rem] p-6">
               <div className="mb-3 flex items-center justify-between gap-3">
                 <h2 className="text-sm font-bold tracking-tight">{eixo.nome}</h2>
                 <span className="glass-soft rounded-full px-2.5 py-1 text-[11px] font-bold text-neutral-600">
-                  {resultado?.pontos ?? 0}/{resultado?.maximo ?? 20} pts ·{" "}
-                  {resultado?.percentual.toFixed(0) ?? 0}%
+                  {eixo.perguntas.length} perguntas
                 </span>
               </div>
               <ul className="flex flex-col gap-2">
                 {eixo.perguntas.map((pergunta) => {
                   const valor = avaliacao.respostas[pergunta.id];
-                  const opcao = pergunta.opcoes.find((o) => o.valor === valor);
+                  const textoFormatado = formatarRespostaTexto(valor);
                   return (
                     <li
                       key={pergunta.id}
-                      className="glass-soft flex items-start justify-between gap-3 rounded-xl px-3.5 py-2.5"
+                      className="glass-soft flex flex-col gap-1 rounded-xl px-3.5 py-2.5"
                     >
-                      <p className="text-xs leading-snug font-medium text-neutral-600">
+                      <p className="text-xs leading-snug font-semibold text-neutral-700">
                         {pergunta.texto}
                       </p>
-                      <span
-                        className={`shrink-0 rounded-full px-2 py-0.5 text-[11px] font-bold ${
-                          (valor ?? 0) === 0
-                            ? "bg-red-500/10 text-red-600"
-                            : (valor ?? 0) >= 3
-                              ? "bg-green-500/10 text-green-700"
-                              : "bg-amber-500/10 text-amber-700"
-                        }`}
-                      >
-                        {opcao?.rotulo ?? "—"} ({valor ?? 0})
-                      </span>
+                      <p className="text-xs font-extrabold text-[#1880fb]">
+                        {textoFormatado}
+                      </p>
                     </li>
                   );
                 })}

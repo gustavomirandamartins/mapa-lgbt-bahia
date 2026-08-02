@@ -1,9 +1,10 @@
 // ============================================================================
-// Motor do Índice de Desenvolvimento do Turismo LGBTQIAPN+ (IDT-LGBT)
-// Fonte: docs/IDT_LGBT_Calculo.md e docs/IDT_LGBT_Completo.md (SETUR-BA)
+// Metodologia TGS-DT: Plataforma de Mapeamento do Turismo LGBTQIAPN+ Municipal
+// (PLATUR-LGBT+ Bahia — SETUR-BA)
 //
 // Módulo autocontido e sem dependências de runtime para poder ser executado
 // tanto no Next.js (client e server) quanto no Node.js puro (testes).
+// Nota: O cálculo de notas e pesos foi removido conforme a nova metodologia.
 // ============================================================================
 
 export type IdtEixoId =
@@ -16,29 +17,34 @@ export type IdtEixoId =
   | "oferta";
 
 export interface IdtOpcao {
-  valor: number;
+  valor: string | number;
   rotulo: string;
 }
+
+export type IdtTipoPergunta = "radio" | "checkbox" | "text";
 
 export interface IdtPergunta {
   id: string;
   texto: string;
-  opcoes: IdtOpcao[];
+  tipo: IdtTipoPergunta;
+  opcoes?: IdtOpcao[];
+  placeholder?: string;
 }
 
 export interface IdtEixo {
   id: IdtEixoId;
   nome: string;
   nomeCurto: string;
-  /** Peso na composição do índice (fração de 1). Ex.: 0.20 = 20%. */
-  peso: number;
+  peso: number; // 0 por padrão (sem pontuação)
   perguntas: IdtPergunta[];
-  /** Recomendação automática exibida quando o eixo está abaixo de 50%. */
-  recomendacao: string;
+  recomendacao?: string;
 }
 
-/** Mapa pergunta.id -> valor escolhido (0 a 4). */
-export type IdtRespostas = Record<string, number>;
+/** Tipo dos valores de resposta aceitos em uma pergunta. */
+export type IdtValorResposta = string | string[] | boolean | number | null | undefined;
+
+/** Mapa pergunta.id -> valor. */
+export type IdtRespostas = Record<string, IdtValorResposta>;
 
 export interface IdtResultadoEixo {
   eixoId: IdtEixoId;
@@ -47,10 +53,9 @@ export interface IdtResultadoEixo {
   peso: number;
   pontos: number;
   maximo: number;
-  /** 0–100: pontos / maximo. */
   percentual: number;
-  /** 0–(peso*100): contribuição do eixo para a nota final. */
   ponderado: number;
+  respostas: Record<string, IdtValorResposta>;
 }
 
 export interface IdtClassificacao {
@@ -61,7 +66,6 @@ export interface IdtClassificacao {
 
 export interface IdtResultado {
   eixos: IdtResultadoEixo[];
-  /** 0–100, soma dos ponderados. */
   notaFinal: number;
   classificacao: IdtClassificacao;
   pontosFortes: string[];
@@ -70,141 +74,520 @@ export interface IdtResultado {
 }
 
 // ----------------------------------------------------------------------------
-// Escalas de resposta (metodologia: 0 = não existe ... 4 = existe e é monitorado)
+// Classificações (Mapeamento do Município)
 // ----------------------------------------------------------------------------
 
-/** Eixos 3–7: escala completa 0|1|2|3|4. */
-export const ESCALA_MATURIDADE: IdtOpcao[] = [
-  { valor: 0, rotulo: "Não existe" },
-  { valor: 1, rotulo: "Existe de forma inicial" },
-  { valor: 2, rotulo: "Existe parcialmente" },
-  { valor: 3, rotulo: "Existe de forma consolidada" },
-  { valor: 4, rotulo: "Existe e é monitorado" },
+export const CLASSIFICACOES: IdtClassificacao[] = [
+  {
+    nivel: "Mapeado",
+    faixa: "Com Respostas",
+    cor: "#10b981", // verde vibrante
+  },
+  {
+    nivel: "Não Mapeado",
+    faixa: "Sem Respostas",
+    cor: "#94a3b8", // cinza neutro
+  },
 ];
 
-/** Eixos 1–2 (exceto 1a pergunta do Eixo 1): escala 0|2|4. */
-export const ESCALA_SIM_NAO: IdtOpcao[] = [
-  { valor: 0, rotulo: "Não" },
-  { valor: 2, rotulo: "Sim, de forma inicial ou parcial" },
-  { valor: 4, rotulo: "Sim, de forma consolidada" },
-];
+export const COR_SEM_DADOS = "#94a3b8";
+
+export function classificar(notaFinal: number): IdtClassificacao {
+  return notaFinal > 0 ? CLASSIFICACOES[0] : CLASSIFICACOES[1];
+}
+
+export function corDaNota(notaFinal: number): string {
+  return classificar(notaFinal).cor;
+}
 
 // ----------------------------------------------------------------------------
-// Questionário oficial — 7 eixos, 35 perguntas
+// Questionário oficial — 7 eixos, 49 perguntas (Apêndice D)
 // ----------------------------------------------------------------------------
 
 export const IDT_QUESTIONARIO: IdtEixo[] = [
   {
     id: "governanca",
-    nome: "Governança",
-    nomeCurto: "Govern.",
-    peso: 0.2,
-    recomendacao:
-      "Elaborar Plano Municipal de Turismo Inclusivo e institucionalizar a governança do segmento (responsável formal, conselho e orçamento).",
+    nome: "Estrutura Turística do Município",
+    nomeCurto: "Estrutura",
+    peso: 0,
     perguntas: [
       {
-        id: "gov_1",
-        texto: "Existe responsável pelo Turismo LGBTQIAPN+ no município?",
+        id: "q1",
+        texto: "1. O município integra o Mapa do Turismo Brasileiro?",
+        tipo: "radio",
         opcoes: [
-          { valor: 0, rotulo: "Não" },
-          { valor: 2, rotulo: "Existe de maneira informal" },
-          { valor: 4, rotulo: "Existe formalmente" },
+          { valor: "Sim", rotulo: "Sim" },
+          { valor: "Não", rotulo: "Não" },
+          { valor: "Em processo de inclusão", rotulo: "Em processo de inclusão" },
         ],
       },
-      { id: "gov_2", texto: "O Plano Municipal de Turismo contempla o segmento LGBTQIAPN+?", opcoes: ESCALA_SIM_NAO },
-      { id: "gov_3", texto: "Existe Conselho Municipal LGBT?", opcoes: ESCALA_SIM_NAO },
-      { id: "gov_4", texto: "Existe grupo de trabalho intersetorial?", opcoes: ESCALA_SIM_NAO },
-      { id: "gov_5", texto: "O município possui orçamento destinado ao segmento?", opcoes: ESCALA_SIM_NAO },
+      {
+        id: "q2",
+        texto: "2. Caso não integre, informe o motivo.",
+        tipo: "text",
+        placeholder: "Descreva o motivo (se aplicável)...",
+      },
+      {
+        id: "q3",
+        texto: "3. O município possui Conselho Municipal de Turismo ativo?",
+        tipo: "radio",
+        opcoes: [
+          { valor: "Sim", rotulo: "Sim" },
+          { valor: "Não", rotulo: "Não" },
+        ],
+      },
+      {
+        id: "q4",
+        texto: "4. O município possui Plano Municipal de Turismo vigente?",
+        tipo: "radio",
+        opcoes: [
+          { valor: "Sim", rotulo: "Sim" },
+          { valor: "Não", rotulo: "Não" },
+          { valor: "Em elaboração", rotulo: "Em elaboração" },
+        ],
+      },
+      {
+        id: "q5",
+        texto: "5. O município possui órgão ou secretaria responsável pelo turismo?",
+        tipo: "radio",
+        opcoes: [
+          { valor: "Sim", rotulo: "Sim" },
+          { valor: "Não", rotulo: "Não" },
+        ],
+      },
+      {
+        id: "q6",
+        texto: "6. O município recebe fluxo turístico regularmente?",
+        tipo: "radio",
+        opcoes: [
+          { valor: "Sim", rotulo: "Sim" },
+          { valor: "Apenas em eventos", rotulo: "Apenas em eventos" },
+          { valor: "Não", rotulo: "Não" },
+        ],
+      },
+      {
+        id: "q7",
+        texto: "7. Existe estimativa do número de visitantes anuais?",
+        tipo: "text",
+        placeholder: "Informe a estimativa anual de visitantes (se houver)...",
+      },
+      {
+        id: "q8",
+        texto: "8. Quais segmentos turísticos são desenvolvidos no município?",
+        tipo: "checkbox",
+        opcoes: [
+          { valor: "Sol e Praia", rotulo: "Sol e Praia" },
+          { valor: "Cultural", rotulo: "Cultural" },
+          { valor: "Natureza", rotulo: "Natureza" },
+          { valor: "Ecoturismo", rotulo: "Ecoturismo" },
+          { valor: "Aventura", rotulo: "Aventura" },
+          { valor: "Rural", rotulo: "Rural" },
+          { valor: "Religioso", rotulo: "Religioso" },
+          { valor: "Náutico", rotulo: "Náutico" },
+          { valor: "Negócios e Eventos", rotulo: "Negócios e Eventos" },
+          { valor: "Turismo de Base Comunitária", rotulo: "Turismo de Base Comunitária" },
+          { valor: "LGBTQIAPN+", rotulo: "LGBTQIAPN+" },
+          { valor: "Outro", rotulo: "Outro" },
+        ],
+      },
     ],
   },
   {
     id: "legislacao",
-    nome: "Legislação e Direitos Humanos",
-    nomeCurto: "Legislação",
-    peso: 0.15,
-    recomendacao:
-      "Criar legislação municipal antidiscriminatória e políticas públicas específicas para a população LGBTQIAPN+.",
+    nome: "Turismo LGBTQIAPN+",
+    nomeCurto: "Turismo LGBT+",
+    peso: 0,
     perguntas: [
-      { id: "leg_1", texto: "Existe legislação antidiscriminatória?", opcoes: ESCALA_SIM_NAO },
-      { id: "leg_2", texto: "Existe política municipal LGBT?", opcoes: ESCALA_SIM_NAO },
-      { id: "leg_3", texto: "Existe protocolo de combate à LGBTfobia?", opcoes: ESCALA_SIM_NAO },
-      { id: "leg_4", texto: "Existe centro de referência ou equipamento de atendimento?", opcoes: ESCALA_SIM_NAO },
-      { id: "leg_5", texto: "Existe plano de direitos humanos com ações LGBTQIAPN+?", opcoes: ESCALA_SIM_NAO },
+      {
+        id: "q9",
+        texto: "9. O município recebe turistas LGBTQIAPN+?",
+        tipo: "radio",
+        opcoes: [
+          { valor: "Sim", rotulo: "Sim" },
+          { valor: "Não", rotulo: "Não" },
+          { valor: "Não sabe informar", rotulo: "Não sabe informar" },
+        ],
+      },
+      {
+        id: "q10",
+        texto: "10. A origem predominante desse público é:",
+        tipo: "radio",
+        opcoes: [
+          { valor: "Regional", rotulo: "Regional" },
+          { valor: "Nacional", rotulo: "Nacional" },
+          { valor: "Internacional", rotulo: "Internacional" },
+          { valor: "Não sabe informar", rotulo: "Não sabe informar" },
+        ],
+      },
+      {
+        id: "q11",
+        texto: "11. Existem períodos do ano com maior fluxo desse público? Se sim, quais?",
+        tipo: "text",
+        placeholder: "Ex.: Verão, Carnaval, Festivais (ou 'Não')...",
+      },
+      {
+        id: "q12",
+        texto: "12. O município integra ou mantém parceria com redes nacionais ou internacionais de turismo LGBTQIAPN+? Se sim, quais?",
+        tipo: "text",
+        placeholder: "Ex.: IGLTA, Câmara de Comércio LGBT, etc. (ou 'Não')...",
+      },
     ],
   },
   {
     id: "pesquisa",
-    nome: "Pesquisa e Dados",
-    nomeCurto: "Pesquisa",
-    peso: 0.15,
-    recomendacao:
-      "Inserir variáveis de orientação sexual e identidade de gênero nas pesquisas turísticas e publicar relatórios periódicos.",
+    nome: "Oferta Turística",
+    nomeCurto: "Oferta",
+    peso: 0,
     perguntas: [
-      { id: "pes_1", texto: "O município realiza pesquisa de demanda turística?", opcoes: ESCALA_MATURIDADE },
-      { id: "pes_2", texto: "Coleta informações sobre orientação sexual?", opcoes: ESCALA_MATURIDADE },
-      { id: "pes_3", texto: "Coleta informações sobre identidade de gênero?", opcoes: ESCALA_MATURIDADE },
-      { id: "pes_4", texto: "Produz indicadores do segmento?", opcoes: ESCALA_MATURIDADE },
-      { id: "pes_5", texto: "Publica relatórios periódicos?", opcoes: ESCALA_MATURIDADE },
+      {
+        id: "q13",
+        texto: "13. Existem empreendimentos reconhecidos como LGBTQIAPN+ friendly? Quais?",
+        tipo: "text",
+        placeholder: "Liste os empreendimentos (ou 'Não')...",
+      },
+      {
+        id: "q14",
+        texto: "14. Há empreendimentos que possuem políticas de diversidade ou atendimento inclusivo? Quais?",
+        tipo: "text",
+        placeholder: "Liste os empreendimentos (ou 'Não')...",
+      },
+      {
+        id: "q15",
+        texto: "15. Algum empreendimento participa de redes nacionais ou internacionais de turismo LGBTQIAPN+? Quais?",
+        tipo: "text",
+        placeholder: "Liste os empreendimentos e redes (ou 'Não')...",
+      },
+      {
+        id: "q16",
+        texto: "16. Existem atrativos ou espaços reconhecidos pela comunidade LGBTQIAPN+?",
+        tipo: "text",
+        placeholder: "Descreva os atrativos ou espaços (ou 'Não')...",
+      },
+      {
+        id: "q17",
+        texto: "17. Existem roteiros ou experiências turísticas voltadas ao segmento? Quais?",
+        tipo: "text",
+        placeholder: "Descreva os roteiros ou experiências (ou 'Não')...",
+      },
     ],
   },
   {
     id: "qualificacao",
-    nome: "Qualificação",
-    nomeCurto: "Qualific.",
-    peso: 0.15,
-    recomendacao:
-      "Implementar programa permanente de capacitação do trade turístico, servidores públicos e forças de segurança.",
+    nome: "Festejos e Celebrações",
+    nomeCurto: "Festejos",
+    peso: 0,
     perguntas: [
-      { id: "qua_1", texto: "O município capacita o trade turístico?", opcoes: ESCALA_MATURIDADE },
-      { id: "qua_2", texto: "Capacita servidores públicos?", opcoes: ESCALA_MATURIDADE },
-      { id: "qua_3", texto: "Capacita forças de segurança?", opcoes: ESCALA_MATURIDADE },
-      { id: "qua_4", texto: "Possui curso permanente?", opcoes: ESCALA_MATURIDADE },
-      { id: "qua_5", texto: "Mais de 50 profissionais capacitados?", opcoes: ESCALA_MATURIDADE },
+      {
+        id: "q18",
+        texto: "18. O município realiza Parada do Orgulho LGBTQIAPN+?",
+        tipo: "radio",
+        opcoes: [
+          { valor: "Sim", rotulo: "Sim" },
+          { valor: "Não", rotulo: "Não" },
+        ],
+      },
+      {
+        id: "q19",
+        texto: "19. Ano de criação da Parada (se aplicável)",
+        tipo: "text",
+        placeholder: "Ex.: 2018 (ou 'Não se aplica')...",
+      },
+      {
+        id: "q20",
+        texto: "20. Público estimado na Parada",
+        tipo: "text",
+        placeholder: "Ex.: 5.000 pessoas...",
+      },
+      {
+        id: "q21",
+        texto: "21. Quem organiza a Parada?",
+        tipo: "text",
+        placeholder: "Ex.: ONG local, Coletivo, Prefeitura...",
+      },
+      {
+        id: "q22",
+        texto: "22. A Prefeitura apoia institucionalmente ou financeiramente?",
+        tipo: "radio",
+        opcoes: [
+          { valor: "Sim", rotulo: "Sim" },
+          { valor: "Não", rotulo: "Não" },
+        ],
+      },
+      {
+        id: "q23",
+        texto: "23. O evento gera fluxo turístico?",
+        tipo: "radio",
+        opcoes: [
+          { valor: "Sim", rotulo: "Sim" },
+          { valor: "Não", rotulo: "Não" },
+          { valor: "Não sabe informar", rotulo: "Não sabe informar" },
+        ],
+      },
+      {
+        id: "q24",
+        texto: "24. Existem outros eventos LGBTQIAPN+? Quais?",
+        tipo: "text",
+        placeholder: "Liste festivais da diversidade, semanas culturais, etc...",
+      },
     ],
   },
   {
     id: "promocao",
-    nome: "Promoção Turística",
-    nomeCurto: "Promoção",
-    peso: 0.1,
-    recomendacao:
-      "Desenvolver estratégia de promoção do destino: materiais específicos, campanhas de diversidade e presença em feiras do segmento.",
+    nome: "Qualificação",
+    nomeCurto: "Qualificação",
+    peso: 0,
     perguntas: [
-      { id: "pro_1", texto: "O município divulga o segmento em seu site?", opcoes: ESCALA_MATURIDADE },
-      { id: "pro_2", texto: "Participa de feiras de turismo LGBTQIAPN+?", opcoes: ESCALA_MATURIDADE },
-      { id: "pro_3", texto: "Possui materiais promocionais específicos?", opcoes: ESCALA_MATURIDADE },
-      { id: "pro_4", texto: "Desenvolve campanhas de diversidade?", opcoes: ESCALA_MATURIDADE },
-      { id: "pro_5", texto: "Possui marca de destino inclusivo?", opcoes: ESCALA_MATURIDADE },
+      {
+        id: "q25",
+        texto: "25. O município já realizou capacitações sobre atendimento ao turista LGBTQIAPN+?",
+        tipo: "radio",
+        opcoes: [
+          { valor: "Sim", rotulo: "Sim" },
+          { valor: "Não", rotulo: "Não" },
+        ],
+      },
+      {
+        id: "q26",
+        texto: "26. Quem promoveu as capacitações?",
+        tipo: "checkbox",
+        opcoes: [
+          { valor: "SETUR-BA", rotulo: "SETUR-BA" },
+          { valor: "Ministério do Turismo", rotulo: "Ministério do Turismo" },
+          { valor: "Prefeitura", rotulo: "Prefeitura" },
+          { valor: "Sebrae", rotulo: "Sebrae" },
+          { valor: "Câmara de Comércio e Turismo LGBT do Brasil", rotulo: "Câmara de Comércio e Turismo LGBT do Brasil" },
+          { valor: "IGLTA", rotulo: "IGLTA" },
+          { valor: "Outro", rotulo: "Outro" },
+        ],
+      },
+      {
+        id: "q27",
+        texto: "27. Quantos profissionais foram capacitados?",
+        tipo: "text",
+        placeholder: "Ex.: 150 profissionais...",
+      },
+      {
+        id: "q28",
+        texto: "28. Quais segmentos participaram?",
+        tipo: "checkbox",
+        opcoes: [
+          { valor: "Meios de hospedagem", rotulo: "Meios de hospedagem" },
+          { valor: "Restaurantes", rotulo: "Restaurantes" },
+          { valor: "Guias de Turismo", rotulo: "Guias de Turismo" },
+          { valor: "Agências", rotulo: "Agências" },
+          { valor: "Condutores", rotulo: "Condutores" },
+          { valor: "CAT", rotulo: "CAT" },
+          { valor: "Segurança Pública", rotulo: "Segurança Pública" },
+          { valor: "Guarda Municipal", rotulo: "Guarda Municipal" },
+          { valor: "Comércio", rotulo: "Comércio" },
+          { valor: "Outros", rotulo: "Outros" },
+        ],
+      },
     ],
   },
   {
     id: "seguranca",
-    nome: "Segurança e Proteção",
-    nomeCurto: "Segurança",
-    peso: 0.15,
-    recomendacao:
-      "Implantar protocolo de segurança: atendimento às vítimas de LGBTfobia, canal de denúncia e rede de acolhimento.",
+    nome: "Promoção Turística",
+    nomeCurto: "Promoção",
+    peso: 0,
     perguntas: [
-      { id: "seg_1", texto: "Existe protocolo de atendimento às vítimas de LGBTfobia?", opcoes: ESCALA_MATURIDADE },
-      { id: "seg_2", texto: "Existe rede de acolhimento?", opcoes: ESCALA_MATURIDADE },
-      { id: "seg_3", texto: "Existe canal de denúncia?", opcoes: ESCALA_MATURIDADE },
-      { id: "seg_4", texto: "Existe monitoramento de ocorrências?", opcoes: ESCALA_MATURIDADE },
-      { id: "seg_5", texto: "Há capacitação das forças de segurança?", opcoes: ESCALA_MATURIDADE },
+      {
+        id: "q29",
+        texto: "29. O município realiza ações de promoção voltadas ao Turismo LGBTQIAPN+?",
+        tipo: "radio",
+        opcoes: [
+          { valor: "Sim", rotulo: "Sim" },
+          { valor: "Não", rotulo: "Não" },
+        ],
+      },
+      {
+        id: "q30",
+        texto: "30. Possui material promocional inclusivo?",
+        tipo: "radio",
+        opcoes: [
+          { valor: "Sim", rotulo: "Sim" },
+          { valor: "Não", rotulo: "Não" },
+        ],
+      },
+      {
+        id: "q31",
+        texto: "31. Participa de feiras ou eventos do segmento? Quais?",
+        tipo: "text",
+        placeholder: "Informe feiras ou eventos (ou 'Não')...",
+      },
+      {
+        id: "q32",
+        texto: "32. Tem interesse em integrar roteiros estaduais de Turismo LGBTQIAPN+?",
+        tipo: "radio",
+        opcoes: [
+          { valor: "Sim", rotulo: "Sim" },
+          { valor: "Não", rotulo: "Não" },
+        ],
+      },
     ],
   },
   {
     id: "oferta",
-    nome: "Oferta Turística",
-    nomeCurto: "Oferta",
-    peso: 0.1,
-    recomendacao:
-      "Mapear empreendimentos, criar roteiros e experiências de turismo inclusivo e estruturar calendário de eventos LGBTQIAPN+.",
+    nome: "Direitos Humanos, Proteção e Rede de Acolhimento",
+    nomeCurto: "Direitos & Acolhim.",
+    peso: 0,
     perguntas: [
-      { id: "ofe_1", texto: "Existem eventos LGBTQIAPN+ no município?", opcoes: ESCALA_MATURIDADE },
-      { id: "ofe_2", texto: "Existem empreendimentos mapeados?", opcoes: ESCALA_MATURIDADE },
-      { id: "ofe_3", texto: "Existem roteiros turísticos?", opcoes: ESCALA_MATURIDADE },
-      { id: "ofe_4", texto: "Existem experiências de turismo inclusivo?", opcoes: ESCALA_MATURIDADE },
-      { id: "ofe_5", texto: "Existe calendário de eventos?", opcoes: ESCALA_MATURIDADE },
+      {
+        id: "q33",
+        texto: "33. Existe Coordenadoria, Diretoria ou setor responsável pelas políticas LGBTQIAPN+?",
+        tipo: "radio",
+        opcoes: [
+          { valor: "Sim", rotulo: "Sim" },
+          { valor: "Não", rotulo: "Não" },
+        ],
+      },
+      {
+        id: "q34",
+        texto: "34. Existe Conselho Municipal LGBTQIAPN+?",
+        tipo: "radio",
+        opcoes: [
+          { valor: "Sim", rotulo: "Sim" },
+          { valor: "Não", rotulo: "Não" },
+        ],
+      },
+      {
+        id: "q35",
+        texto: "35. Existe Centro de Referência LGBTQIAPN+?",
+        tipo: "radio",
+        opcoes: [
+          { valor: "Sim", rotulo: "Sim" },
+          { valor: "Não", rotulo: "Não" },
+        ],
+      },
+      {
+        id: "q36",
+        texto: "36. Existe articulação entre a Secretaria de Turismo e a política municipal LGBTQIAPN+?",
+        tipo: "radio",
+        opcoes: [
+          { valor: "Sim", rotulo: "Sim" },
+          { valor: "Não", rotulo: "Não" },
+        ],
+      },
+      {
+        id: "q37",
+        texto: "37. O município possui protocolo de atendimento às vítimas de LGBTfobia?",
+        tipo: "radio",
+        opcoes: [
+          { valor: "Sim", rotulo: "Sim" },
+          { valor: "Não", rotulo: "Não" },
+        ],
+      },
+      {
+        id: "q38",
+        texto: "38. Existe fluxo de encaminhamento desses casos?",
+        tipo: "radio",
+        opcoes: [
+          { valor: "Sim", rotulo: "Sim" },
+          { valor: "Não", rotulo: "Não" },
+        ],
+      },
+      {
+        id: "q39",
+        texto: "39. Existem canais municipais para denúncia?",
+        tipo: "radio",
+        opcoes: [
+          { valor: "Sim", rotulo: "Sim" },
+          { valor: "Não", rotulo: "Não" },
+        ],
+      },
+      {
+        id: "q40",
+        texto: "40. Esses canais são divulgados aos turistas?",
+        tipo: "radio",
+        opcoes: [
+          { valor: "Sim", rotulo: "Sim" },
+          { valor: "Não", rotulo: "Não" },
+        ],
+      },
+      {
+        id: "q41",
+        texto: "41. Existe articulação com Guarda Municipal, Polícia Militar, Polícia Civil, Ministério Público ou Defensoria Pública?",
+        tipo: "radio",
+        opcoes: [
+          { valor: "Sim", rotulo: "Sim" },
+          { valor: "Não", rotulo: "Não" },
+        ],
+      },
+      {
+        id: "q42",
+        texto: "42. Quais equipamentos integram a rede de atendimento?",
+        tipo: "checkbox",
+        opcoes: [
+          { valor: "Centro de Referência LGBTQIAPN+", rotulo: "Centro de Referência LGBTQIAPN+" },
+          { valor: "CRAS", rotulo: "CRAS" },
+          { valor: "CREAS", rotulo: "CREAS" },
+          { valor: "Defensoria Pública", rotulo: "Defensoria Pública" },
+          { valor: "Ministério Público", rotulo: "Ministério Público" },
+          { valor: "Delegacia Especializada", rotulo: "Delegacia Especializada" },
+          { valor: "Ouvidoria", rotulo: "Ouvidoria" },
+          { valor: "Outros", rotulo: "Outros" },
+        ],
+      },
+      {
+        id: "q43",
+        texto: "43. Existem organizações da sociedade civil que atuam na defesa dos direitos LGBTQIAPN+? Quais?",
+        tipo: "text",
+        placeholder: "Liste as organizações (ou 'Não')...",
+      },
+      {
+        id: "q44",
+        texto: "44. O município mantém cadastro dessas organizações?",
+        tipo: "radio",
+        opcoes: [
+          { valor: "Sim", rotulo: "Sim" },
+          { valor: "Não", rotulo: "Não" },
+        ],
+      },
+      {
+        id: "q45",
+        texto: "45. Os profissionais da rede recebem capacitação sobre diversidade sexual e identidade de gênero?",
+        tipo: "radio",
+        opcoes: [
+          { valor: "Sim", rotulo: "Sim" },
+          { valor: "Não", rotulo: "Não" },
+        ],
+      },
+      {
+        id: "q46",
+        texto: "46. Os profissionais do turismo conhecem os fluxos de encaminhamento em casos de discriminação?",
+        tipo: "radio",
+        opcoes: [
+          { valor: "Sim", rotulo: "Sim" },
+          { valor: "Não", rotulo: "Não" },
+        ],
+      },
+      {
+        id: "q47",
+        texto: "47. O município registra ocorrências relacionadas à LGBTfobia?",
+        tipo: "radio",
+        opcoes: [
+          { valor: "Sim", rotulo: "Sim" },
+          { valor: "Não", rotulo: "Não" },
+        ],
+      },
+      {
+        id: "q48",
+        texto: "48. Existem relatórios ou estatísticas sobre essas ocorrências?",
+        tipo: "radio",
+        opcoes: [
+          { valor: "Sim", rotulo: "Sim" },
+          { valor: "Não", rotulo: "Não" },
+        ],
+      },
+      {
+        id: "q49",
+        texto: "49. As informações são compartilhadas entre os órgãos municipais?",
+        tipo: "radio",
+        opcoes: [
+          { valor: "Sim", rotulo: "Sim" },
+          { valor: "Não", rotulo: "Não" },
+        ],
+      },
     ],
   },
 ];
@@ -214,108 +597,53 @@ export const TOTAL_PERGUNTAS = IDT_QUESTIONARIO.reduce(
   0
 );
 
-// ----------------------------------------------------------------------------
-// Classificação (faixas oficiais)
-// ----------------------------------------------------------------------------
-
-export const COR_SEM_DADOS = "#e2e6f0";
-
-export const CLASSIFICACOES: (IdtClassificacao & { min: number; max: number })[] = [
-  { min: 0, max: 20, nivel: "Município Inexistente", faixa: "0–20", cor: "#1880fb" },
-  { min: 20, max: 40, nivel: "Município Sensibilizado", faixa: "21–40", cor: "#00cc00" },
-  { min: 40, max: 60, nivel: "Município Estruturante", faixa: "41–60", cor: "#ffd000" },
-  { min: 60, max: 80, nivel: "Município Consolidado", faixa: "61–80", cor: "#ff8000" },
-  { min: 80, max: 100, nivel: "Município Referência em Turismo LGBTQIAPN+", faixa: "81–100", cor: "#ff0000" },
-];
-
-export function classificar(nota: number): IdtClassificacao {
-  for (const faixa of CLASSIFICACOES) {
-    if (nota <= faixa.max) {
-      return { nivel: faixa.nivel, faixa: faixa.faixa, cor: faixa.cor };
-    }
-  }
-  const ultima = CLASSIFICACOES[CLASSIFICACOES.length - 1];
-  return { nivel: ultima.nivel, faixa: ultima.faixa, cor: ultima.cor };
-}
-
-/** Cor do município no mapa (choropleth) a partir da nota 0–100. */
-export function corDaNota(nota: number | null | undefined): string {
-  if (nota === null || nota === undefined || Number.isNaN(nota)) return COR_SEM_DADOS;
-  return classificar(nota).cor;
-}
-
-// ----------------------------------------------------------------------------
-// Cálculo
-// ----------------------------------------------------------------------------
-
-function arredondar(valor: number): number {
-  return Math.round(valor * 100) / 100;
-}
-
 /**
- * Valida as respostas contra o questionário oficial.
- * Lança Error quando falta resposta ou o valor não é permitido.
- */
-export function validarRespostas(respostas: IdtRespostas): void {
-  if (!respostas || typeof respostas !== "object") {
-    throw new Error("Respostas ausentes ou em formato inválido.");
-  }
-  for (const eixo of IDT_QUESTIONARIO) {
-    for (const pergunta of eixo.perguntas) {
-      const valor = respostas[pergunta.id];
-      if (valor === undefined || valor === null) {
-        throw new Error(`Pergunta sem resposta: ${pergunta.id}`);
-      }
-      if (!pergunta.opcoes.some((opcao) => opcao.valor === valor)) {
-        throw new Error(`Valor inválido (${valor}) para a pergunta ${pergunta.id}`);
-      }
-    }
-  }
-}
-
-/**
- * Calcula o IDT-LGBT a partir das respostas do questionário.
- *
- * Para cada eixo: percentual = (pontos / máximo) * 100; ponderado = percentual * peso.
- * Nota final = soma dos ponderados (0–100).
+ * Processa/calcula o resultado do mapeamento municipal a partir das respostas.
+ * Não existem pesos ou pontuação — o resultado agrega as respostas organizadas.
  */
 export function calcularIdt(respostas: IdtRespostas): IdtResultado {
-  validarRespostas(respostas);
-
   const eixos: IdtResultadoEixo[] = IDT_QUESTIONARIO.map((eixo) => {
-    const pontos = eixo.perguntas.reduce(
-      (acc, pergunta) => acc + respostas[pergunta.id],
-      0
-    );
-    const maximo = eixo.perguntas.length * 4;
-    const percentual = (pontos / maximo) * 100;
-    const ponderado = percentual * eixo.peso;
+    const resEixo: Record<string, IdtValorResposta> = {};
+    for (const perg of eixo.perguntas) {
+      if (perg.id in respostas) {
+        resEixo[perg.id] = respostas[perg.id];
+      }
+    }
     return {
       eixoId: eixo.id,
       nome: eixo.nome,
       nomeCurto: eixo.nomeCurto,
-      peso: eixo.peso,
-      pontos,
-      maximo,
-      percentual: arredondar(percentual),
-      ponderado: arredondar(ponderado),
+      peso: 0,
+      pontos: 0,
+      maximo: 0,
+      percentual: 100,
+      ponderado: 0,
+      respostas: resEixo,
     };
   });
 
-  const notaFinal = arredondar(eixos.reduce((acc, eixo) => acc + eixo.ponderado, 0));
-  const classificacao = classificar(notaFinal);
+  return {
+    eixos,
+    notaFinal: 100, // Valor padrão para compatibilidade de schema SQL
+    classificacao: CLASSIFICACOES[0], // "Mapeado"
+    pontosFortes: [],
+    fragilidades: [],
+    recomendacoes: [],
+  };
+}
 
-  const ordenados = [...eixos].sort((a, b) => b.percentual - a.percentual);
-  const pontosFortes = ordenados.slice(0, 2).map((eixo) => eixo.nome);
-  const fragilidades = ordenados
-    .slice(-2)
-    .reverse()
-    .map((eixo) => eixo.nome);
-
-  const recomendacoes = IDT_QUESTIONARIO.filter((eixo) => {
-    const resultado = eixos.find((item) => item.eixoId === eixo.id);
-    return resultado !== undefined && resultado.percentual < 50;
-  }).map((eixo) => eixo.recomendacao);
-
-  return { eixos, notaFinal, classificacao, pontosFortes, fragilidades, recomendacoes };
+/**
+ * Retorna o texto formatado para exibição de uma resposta na interface.
+ */
+export function formatarRespostaTexto(resposta: IdtValorResposta): string {
+  if (resposta === null || resposta === undefined || resposta === "") {
+    return "Não informado";
+  }
+  if (Array.isArray(resposta)) {
+    return resposta.length > 0 ? resposta.join(", ") : "Não informado";
+  }
+  if (typeof resposta === "boolean") {
+    return resposta ? "Sim" : "Não";
+  }
+  return String(resposta);
 }

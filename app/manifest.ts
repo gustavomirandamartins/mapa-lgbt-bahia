@@ -2,10 +2,10 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "IDT-LGBT Bahia — Mapa do Turismo LGBTQIAPN+",
-    short_name: "IDT Bahia",
+    name: "PLATUR-LGBT+ — Plataforma de Mapeamento do Turismo LGBTQIAPN+ Municipal",
+    short_name: "PLATUR-LGBT+",
     description:
-      "Índice de Desenvolvimento do Turismo LGBTQIAPN+ dos municípios da Bahia (SETUR-BA).",
+      "Plataforma de Mapeamento do Turismo LGBTQIAPN+ dos municípios da Bahia (SETUR-BA).",
     lang: "pt-BR",
     start_url: "/",
     scope: "/",

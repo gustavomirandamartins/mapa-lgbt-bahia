@@ -1,6 +1,6 @@
 import { createClient } from "@supabase/supabase-js";
 
-import type { IdtResultadoEixo } from "@/lib/idt";
+import type { IdtResultadoEixo, IdtValorResposta } from "@/lib/idt";
 import type { Municipio } from "@/lib/auth-guards";
 
 export interface IndicePublico {
@@ -9,6 +9,7 @@ export interface IndicePublico {
   nota_final: number;
   classificacao: string;
   notas_eixos: IdtResultadoEixo[];
+  respostas?: Record<string, IdtValorResposta>;
   submitted_at: string;
 }
 
@@ -28,7 +29,7 @@ export async function getIndicesPublicos(): Promise<IndicePublico[]> {
   try {
     const { data, error } = await createAnonClient()
       .from("indice_publico")
-      .select("municipio_id, nome, nota_final, classificacao, notas_eixos, submitted_at");
+      .select("municipio_id, nome, nota_final, classificacao, notas_eixos, respostas, submitted_at");
     if (error) return [];
     return (data ?? []) as IndicePublico[];
   } catch {

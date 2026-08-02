@@ -12,9 +12,8 @@ export interface SubmissaoState {
 }
 
 /**
- * Submete o questionário IDT-LGBT.
- * O cálculo é SEMPRE refeito no servidor (mesma engine lib/idt.ts) —
- * o cliente nunca grava notas diretamente.
+ * Submete o questionário da Plataforma de Mapeamento do Turismo LGBTQIAPN+ Municipal (PLATUR-LGBT+).
+ * As respostas são salvas no formato nativo do questionário (sem cálculo de notas ou pesos).
  */
 export async function submeterAvaliacao(
   respostas: IdtRespostas

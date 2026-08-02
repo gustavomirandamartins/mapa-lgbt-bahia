@@ -63,7 +63,7 @@ export default async function AdminPage() {
             <PrideLogo size={52} />
             <div>
               <p className="text-sm font-extrabold tracking-tight">
-                Administração · IDT-LGBT
+                Administração · PLATUR-LGBT+
               </p>
               <p className="text-xs font-medium text-neutral-500">
                 Aprovações de cadastros e avaliações

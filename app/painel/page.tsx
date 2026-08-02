@@ -109,7 +109,7 @@ export default async function PainelPage() {
             </h1>
             <p className="mx-auto mt-2 max-w-sm text-sm text-neutral-500">
               O administrador vai revisar e aprovar seu cadastro. Assim que for
-              liberado, você poderá responder ao questionário IDT-LGBT de{" "}
+              liberado, você poderá responder ao questionário PLATUR-LGBT+ de{" "}
               <strong>{municipio?.nome}</strong>.
             </p>
           </section>
@@ -147,7 +147,7 @@ export default async function PainelPage() {
                 </div>
                 <div>
                   <p className="text-[11px] font-semibold tracking-widest text-neutral-400 uppercase">
-                    IDT-LGBT publicado
+                    PLATUR-LGBT+ publicado
                   </p>
                   <p
                     className="text-lg leading-tight font-bold"
@@ -194,10 +194,10 @@ export default async function PainelPage() {
                   <p className="text-lg font-extrabold tracking-tight">
                     {publicada
                       ? "Responder nova avaliação"
-                      : "Responder o questionário IDT-LGBT"}
+                      : "Responder o questionário PLATUR-LGBT+"}
                   </p>
                   <p className="text-sm opacity-90">
-                    7 eixos · 35 perguntas · cálculo automático do índice
+                    7 eixos · 49 perguntas · mapeamento municipal do turismo
                   </p>
                 </div>
                 <ClipboardList className="size-8 shrink-0 transition-transform group-hover:scale-110" aria-hidden />

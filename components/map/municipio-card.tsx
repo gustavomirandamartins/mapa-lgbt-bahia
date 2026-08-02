@@ -1,10 +1,16 @@
 "use client";
 
-import { X, TrendingUp, TrendingDown, CalendarDays, Info } from "lucide-react";
+import { useState } from "react";
+import { X, CalendarDays, CheckCircle2, AlertCircle } from "lucide-react";
 
-import { corDaNota } from "@/lib/idt";
+import {
+  IDT_QUESTIONARIO,
+  corDaNota,
+  formatarRespostaTexto,
+  type IdtEixoId,
+  type IdtValorResposta,
+} from "@/lib/idt";
 import type { IndicePublico } from "@/lib/public-data";
-import { RadarChart } from "@/components/map/radar-chart";
 
 interface MunicipioCardProps {
   nome: string;
@@ -24,16 +30,34 @@ function formatarData(iso: string): string {
 
 /**
  * Card do município (bottom sheet no mobile / painel flutuante no desktop),
- * exibido ao tocar em um município no mapa.
+ * exibindo as respostas completas aos 7 eixos do PLATUR-LGBT+.
  */
 export function MunicipioCard({ nome, indice, onClose }: MunicipioCardProps) {
+  const [eixoAtivo, setEixoAtivo] = useState<IdtEixoId>("governanca");
+
+  const eixoSelecionado = IDT_QUESTIONARIO.find((e) => e.id === eixoAtivo) ?? IDT_QUESTIONARIO[0];
+
+  // Mescla respostas salvas no objeto indice.respostas ou em indice.notas_eixos
+  const obterResposta = (perguntaId: string): IdtValorResposta => {
+    if (indice?.respostas && perguntaId in indice.respostas) {
+      return indice.respostas[perguntaId];
+    }
+    for (const eixo of indice?.notas_eixos ?? []) {
+      if (eixo.respostas && perguntaId in eixo.respostas) {
+        return eixo.respostas[perguntaId];
+      }
+    }
+    return null;
+  };
+
   return (
-    <div className="animate-sheet-up pointer-events-auto fixed inset-x-3 bottom-3 z-30 mx-auto max-w-md sm:inset-x-auto sm:right-6 sm:bottom-6 sm:w-96">
-      <div className="neuro-card max-h-[76dvh] overflow-y-auto rounded-[2.2rem] p-6">
+    <div className="animate-sheet-up pointer-events-auto fixed inset-x-3 bottom-3 z-30 mx-auto max-w-md sm:inset-x-auto sm:right-6 sm:bottom-6 sm:w-[28rem]">
+      <div className="neuro-card max-h-[82dvh] overflow-y-auto rounded-[2.2rem] p-6">
+        {/* Cabeçalho do Card */}
         <div className="mb-4 flex items-start justify-between gap-3">
           <div>
             <p className="text-[10px] font-bold tracking-widest text-[#64748b] uppercase">
-              Município
+              Município da Bahia
             </p>
             <h2 className="text-xl leading-tight font-extrabold tracking-tight text-[#2c3444]">
               {nome}
@@ -50,110 +74,100 @@ export function MunicipioCard({ nome, indice, onClose }: MunicipioCardProps) {
 
         {indice ? (
           <>
-            <div className="mb-5 flex items-center gap-4">
-              <div className="neuro-rainbow-ring">
-                <div
-                  className="flex size-20 shrink-0 flex-col items-center justify-center rounded-full text-[#2c3444] shadow-[inset_2px_2px_4px_rgba(255,255,255,0.7),inset_-2px_-2px_4px_rgba(0,0,0,0.15)]"
-                  style={{ backgroundColor: corDaNota(indice.nota_final) }}
-                >
-                  <span className="text-2xl leading-none font-extrabold">
-                    {Number(indice.nota_final).toFixed(0)}
-                  </span>
-                  <span className="text-[10px] font-bold opacity-80">
-                    / 100
-                  </span>
-                </div>
+            {/* Badge de Status e Data de Submissão */}
+            <div className="mb-5 flex items-center gap-3">
+              <div
+                className="flex items-center gap-2 rounded-full px-3.5 py-1.5 text-xs font-extrabold text-white shadow-sm"
+                style={{ backgroundColor: corDaNota(indice.nota_final) }}
+              >
+                <CheckCircle2 className="size-4 shrink-0" aria-hidden />
+                <span>{indice.classificacao}</span>
               </div>
-              <div>
-                <p className="text-[10px] font-bold tracking-widest text-[#64748b] uppercase">
-                  IDT-LGBT
-                </p>
-                <p
-                  className="inline-block rounded-full px-3 py-1 text-xs leading-tight font-extrabold text-[#2c3444] shadow-sm"
-                  style={{ backgroundColor: corDaNota(indice.nota_final) }}
-                >
-                  {indice.classificacao}
-                </p>
-                <p className="mt-1.5 flex items-center gap-1.5 text-xs font-semibold text-[#64748b]">
-                  <CalendarDays className="size-3.5" aria-hidden />
-                  Avaliado em {formatarData(indice.submitted_at)}
-                </p>
+              <p className="flex items-center gap-1.5 text-xs font-semibold text-[#64748b]">
+                <CalendarDays className="size-3.5" aria-hidden />
+                {formatarData(indice.submitted_at)}
+              </p>
+            </div>
+
+            {/* Seletor horizontal de Eixos */}
+            <div className="mb-4">
+              <p className="mb-2 text-[11px] font-extrabold tracking-wider text-[#64748b] uppercase">
+                Respostas por Eixo Temático
+              </p>
+              <div className="flex gap-1.5 overflow-x-auto pb-1">
+                {IDT_QUESTIONARIO.map((eixo) => {
+                  const isAtivo = eixo.id === eixoAtivo;
+                  return (
+                    <button
+                      key={eixo.id}
+                      type="button"
+                      onClick={() => setEixoAtivo(eixo.id)}
+                      className={`neuro-pill shrink-0 rounded-full px-3.5 py-1.5 text-xs font-bold transition-all ${
+                        isAtivo
+                          ? "bg-[#1880fb] text-white shadow-[0_4px_10px_rgba(24,128,251,0.35)]"
+                          : "text-[#64748b] hover:text-[#2c3444]"
+                      }`}
+                    >
+                      {eixo.nomeCurto}
+                    </button>
+                  );
+                })}
               </div>
             </div>
 
-            <div className="neuro-inset mb-4 flex justify-center rounded-3xl p-3">
-              <RadarChart
-                eixos={indice.notas_eixos.map((eixo) => ({
-                  nome: eixo.nome,
-                  nomeCurto: eixo.nomeCurto,
-                  percentual: eixo.percentual,
-                }))}
-                size={230}
-              />
+            {/* Título do Eixo Ativo */}
+            <div className="mb-3">
+              <h3 className="text-sm font-extrabold text-[#2c3444]">
+                {eixoSelecionado.nome}
+              </h3>
+              <p className="text-[11px] font-semibold text-[#64748b]">
+                {eixoSelecionado.perguntas.length} perguntas neste eixo
+              </p>
             </div>
 
-            <div className="mt-3 grid grid-cols-2 gap-2.5">
-              {indice.notas_eixos.map((eixo) => (
-                <div
-                  key={eixo.eixoId}
-                  className="neuro-inset rounded-2xl px-3 py-2.5"
-                >
-                  <p className="truncate text-[11px] font-bold text-[#64748b]">
-                    {eixo.nomeCurto}
-                  </p>
-                  <div className="mt-1.5 h-2 overflow-hidden rounded-full bg-[#dbe2f0] shadow-inner">
-                    <div
-                      className="h-full rounded-full bg-[linear-gradient(90deg,#96c8f2,#f7a1c2)] shadow-[2px_0_4px_rgba(0,0,0,0.1)]"
-                      style={{ width: `${eixo.percentual}%` }}
-                    />
+            {/* Lista de Perguntas e Respostas daquele Eixo */}
+            <div className="flex flex-col gap-3">
+              {eixoSelecionado.perguntas.map((perg) => {
+                const valor = obterResposta(perg.id);
+                const textoFormatado = formatarRespostaTexto(valor);
+                const isNaoInformado = textoFormatado === "Não informado";
+
+                return (
+                  <div
+                    key={perg.id}
+                    className="neuro-inset rounded-2xl p-3.5 text-left"
+                  >
+                    <p className="text-xs leading-snug font-bold text-[#2c3444]">
+                      {perg.texto}
+                    </p>
+                    <p
+                      className={`mt-1.5 text-xs font-semibold ${
+                        isNaoInformado
+                          ? "italic text-[#94a3b8]"
+                          : "text-[#1880fb]"
+                      }`}
+                    >
+                      {textoFormatado}
+                    </p>
                   </div>
-                  <p className="mt-1.5 text-[11px] font-extrabold text-[#2c3444]">
-                    {eixo.percentual.toFixed(0)}%
-                  </p>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </>
         ) : (
           <div className="flex flex-col items-center gap-3 py-8 text-center">
             <span className="neuro-inset rounded-full p-4 text-[#64748b]">
-              <Info className="size-6" />
+              <AlertCircle className="size-6" />
             </span>
             <p className="text-sm font-bold text-[#2c3444]">
-              Este município ainda não possui avaliação IDT-LGBT publicada.
+              Este município ainda não possui respostas publicadas no PLATUR-LGBT+.
             </p>
             <p className="text-xs font-medium text-[#64748b]">
               O gestor municipal pode solicitar acesso na Central de Controle e
-              responder ao questionário.
+              responder ao questionário oficial.
             </p>
           </div>
         )}
-      </div>
-    </div>
-  );
-}
-
-export function CardResumoChip({
-  icone,
-  rotulo,
-  valor,
-}: {
-  icone: "up" | "down";
-  rotulo: string;
-  valor: string;
-}) {
-  const Icone = icone === "up" ? TrendingUp : TrendingDown;
-  return (
-    <div className="neuro-inset flex items-center gap-2 rounded-2xl px-3.5 py-2.5">
-      <Icone
-        className={`size-4 ${icone === "up" ? "text-emerald-600" : "text-rose-500"}`}
-        aria-hidden
-      />
-      <div className="min-w-0">
-        <p className="text-[10px] font-bold tracking-wide text-[#64748b] uppercase">
-          {rotulo}
-        </p>
-        <p className="truncate text-xs font-extrabold text-[#2c3444]">{valor}</p>
       </div>
     </div>
   );

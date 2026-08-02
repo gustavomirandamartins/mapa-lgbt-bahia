@@ -26,7 +26,7 @@ export default async function HomePage() {
               Turismo <span className="pride-text">LGBTQIAPN+</span> · Bahia
             </h1>
             <p className="text-[11px] leading-tight font-semibold text-[#64748b] sm:text-xs">
-              Índice de Desenvolvimento do Turismo LGBT (IDT-LGBT)
+              Plataforma de Mapeamento do Turismo LGBTQIAPN+ Municipal
             </p>
           </div>
         </div>

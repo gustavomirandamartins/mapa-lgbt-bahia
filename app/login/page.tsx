@@ -24,7 +24,7 @@ export default function LoginPage() {
             Central de Controle
           </h1>
           <p className="mt-1 text-xs font-semibold text-[#64748b]">
-            Índice de Desenvolvimento do Turismo LGBTQIAPN+ · Bahia
+            Plataforma de Mapeamento do Turismo LGBTQIAPN+ Municipal · Bahia
           </p>
         </div>
 

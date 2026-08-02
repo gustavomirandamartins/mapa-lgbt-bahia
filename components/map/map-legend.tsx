@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import { Search, X } from "lucide-react";
 
-import { CLASSIFICACOES, COR_SEM_DADOS, corDaNota, classificar } from "@/lib/idt";
+import { CLASSIFICACOES, classificar } from "@/lib/idt";
 import type { IndicePublico } from "@/lib/public-data";
 import type { Municipio } from "@/lib/auth-guards";
 
@@ -17,8 +17,8 @@ export interface MapLegendProps {
 }
 
 /**
- * Legenda das faixas do IDT-LGBT exibida sobre o mapa, equipada com busca
- * de cidades e lista de rolagem dos 417 municípios da Bahia com tags coloridas.
+ * Legenda das faixas do PLATUR-LGBT+ exibida sobre o mapa, equipada com busca
+ * de cidades e lista de rolagem dos 417 municípios da Bahia com status colorido.
  */
 export function MapLegend({
   indices,
@@ -57,7 +57,7 @@ export function MapLegend({
     if (faixaSelecionada) {
       lista = lista.filter((m) => {
         const ind = indicesPorId.get(m.id);
-        if (faixaSelecionada === "sem_avaliacao") {
+        if (faixaSelecionada === "sem_avaliacao" || faixaSelecionada === "Sem Respostas") {
           return !ind;
         }
         if (!ind) return false;
@@ -72,7 +72,6 @@ export function MapLegend({
   const renderPilulasFaixas = () => (
     <ul className="flex shrink-0 flex-col gap-2">
       {CLASSIFICACOES.map((faixa) => {
-        const isAmarelo = faixa.cor === "#ffd000";
         const isSelected = faixaSelecionada === faixa.faixa;
         const isDimmed = Boolean(faixaSelecionada) && !isSelected;
         return (
@@ -82,42 +81,18 @@ export function MapLegend({
               onClick={() =>
                 onSelectFaixa?.(isSelected ? null : faixa.faixa)
               }
-              className={`flex w-full items-center justify-center rounded-full px-3.5 py-1.5 text-xs font-extrabold shadow-[0_4px_10px_rgba(0,0,0,0.14),inset_0_2px_2px_rgba(255,255,255,0.4)] transition-all ${
-                isAmarelo ? "text-[#111827]" : "text-white"
-              } ${
+              className={`flex w-full items-center justify-center rounded-full px-3.5 py-2 text-xs font-extrabold text-white shadow-[0_4px_10px_rgba(0,0,0,0.14),inset_0_2px_2px_rgba(255,255,255,0.4)] transition-all ${
                 isSelected
                   ? "scale-[1.03] ring-2 ring-[#2c3444] ring-offset-2 font-black"
                   : ""
               } ${isDimmed ? "opacity-45 hover:opacity-100" : ""}`}
               style={{ backgroundColor: faixa.cor }}
             >
-              {faixa.faixa} • {faixa.nivel.replace("Município ", "")}
+              {faixa.faixa} • {faixa.nivel}
             </button>
           </li>
         );
       })}
-      <li>
-        <button
-          type="button"
-          onClick={() =>
-            onSelectFaixa?.(
-              faixaSelecionada === "sem_avaliacao" ? null : "sem_avaliacao"
-            )
-          }
-          className={`flex w-full items-center justify-center rounded-full px-3.5 py-1.5 text-xs font-extrabold text-[#334155] shadow-[inset_1px_1px_3px_rgba(0,0,0,0.12),-2px_-2px_4px_rgba(255,255,255,0.8),2px_2px_4px_rgba(178,190,214,0.5)] transition-all ${
-            faixaSelecionada === "sem_avaliacao"
-              ? "scale-[1.03] ring-2 ring-[#2c3444] ring-offset-2 font-black"
-              : ""
-          } ${
-            Boolean(faixaSelecionada) && faixaSelecionada !== "sem_avaliacao"
-              ? "opacity-45 hover:opacity-100"
-              : ""
-          }`}
-          style={{ backgroundColor: COR_SEM_DADOS }}
-        >
-          Sem avaliação
-        </button>
-      </li>
       {faixaSelecionada && (
         <li>
           <button
@@ -125,7 +100,7 @@ export function MapLegend({
             onClick={() => onSelectFaixa?.(null)}
             className="w-full text-center text-[11px] font-bold text-[#1880fb] underline hover:text-[#0055c4]"
           >
-            Limpar filtro por cor
+            Limpar filtro de status
           </button>
         </li>
       )}
@@ -136,17 +111,9 @@ export function MapLegend({
     <ul className="flex flex-col gap-1.5">
       {municipiosFiltrados.map((m) => {
         const ind = indicesPorId.get(m.id);
-        const cor = ind ? corDaNota(ind.nota_final) : COR_SEM_DADOS;
-        const isAmarelo = cor === "#ffd000";
+        const cor = ind ? CLASSIFICACOES[0].cor : CLASSIFICACOES[1].cor;
         const isSelecionado = municipioSelecionadoId === m.id;
-
-        let rotulo = "Sem avaliação";
-        if (ind) {
-          rotulo = `${ind.nota_final} • ${ind.classificacao.replace(
-            "Município ",
-            ""
-          )}`;
-        }
+        const rotulo = ind ? "Mapeado" : "Não Mapeado";
 
         return (
           <li key={m.id}>
@@ -166,13 +133,7 @@ export function MapLegend({
                 {m.nome}
               </span>
               <span
-                className={`shrink-0 rounded-full px-2.5 py-1 text-[10px] font-extrabold shadow-[inset_0_1px_1px_rgba(255,255,255,0.4)] ${
-                  ind
-                    ? isAmarelo
-                      ? "text-[#111827]"
-                      : "text-white"
-                    : "text-[#334155]"
-                }`}
+                className="shrink-0 rounded-full px-2.5 py-1 text-[10px] font-extrabold text-white shadow-[inset_0_1px_1px_rgba(255,255,255,0.4)]"
                 style={{ backgroundColor: cor }}
               >
                 {rotulo}
@@ -194,13 +155,13 @@ export function MapLegend({
       {/* 1. Legenda Desktop (Neumorphic Card com busca e lista de rolagem) */}
       <div className="pointer-events-auto neuro-card fixed bottom-6 left-6 z-20 hidden max-h-[calc(100dvh-5rem)] w-[18.5rem] flex-col rounded-[2.2rem] p-5 sm:flex">
         <h3 className="mb-3 text-center text-base font-extrabold tracking-tight text-[#1e293b]">
-          IDT-LGBT (0–100)
+          PLATUR-LGBT+ · Mapeamento
         </h3>
 
-        {/* Pílulas das 5 faixas + sem avaliação (agora clicáveis para filtrar) */}
+        {/* Pílulas de status (Mapeado vs Não Mapeado) clicáveis para filtrar */}
         {renderPilulasFaixas()}
 
-        {/* Total avaliados ou filtrados */}
+        {/* Total mapeados ou filtrados */}
         <div className="mt-3.5 shrink-0 border-t border-[#dce3f0] pt-3 text-center">
           <p className="text-2xl leading-none font-extrabold tracking-tight text-[#1e293b]">
             {faixaSelecionada
@@ -208,7 +169,7 @@ export function MapLegend({
               : `${indices.length} de ${listaMunicipios.length || 417}`}
           </p>
           <p className="mt-1 text-[10px] font-extrabold tracking-widest text-[#64748b] uppercase">
-            {faixaSelecionada ? "Municípios na Faixa" : "Municípios Avaliados"}
+            {faixaSelecionada ? "Municípios Filtrados" : "Municípios Mapeados"}
           </p>
         </div>
 
@@ -234,7 +195,7 @@ export function MapLegend({
           )}
         </div>
 
-        {/* Lista de rolagem dos 417 municípios com tags de cores */}
+        {/* Lista de rolagem dos 417 municípios com status de cor */}
         <div className="mt-3 max-h-[200px] min-h-[80px] flex-1 overflow-y-auto pr-1">
           {renderListaMunicipios()}
         </div>
@@ -254,7 +215,7 @@ export function MapLegend({
             </span>
           </div>
           <span className="rounded-full bg-[#1880fb]/10 px-2.5 py-0.5 text-[10px] font-extrabold text-[#1880fb]">
-            {indices.length} avaliados
+            {indices.length} mapeados
           </span>
         </button>
       </div>
@@ -264,7 +225,7 @@ export function MapLegend({
           <div className="neuro-card flex max-h-[85dvh] w-full flex-col rounded-t-[2.5rem] p-6 pb-8 shadow-2xl">
             <div className="mb-4 flex items-center justify-between">
               <h3 className="text-base font-extrabold tracking-tight text-[#1e293b]">
-                IDT-LGBT (0–100) · {listaMunicipios.length} Municípios
+                PLATUR-LGBT+ · {listaMunicipios.length} Municípios
               </h3>
               <button
                 type="button"
@@ -276,7 +237,7 @@ export function MapLegend({
               </button>
             </div>
 
-            {/* Filtros por faixa de cores no mobile */}
+            {/* Filtros por status de cores no mobile */}
             <div className="mb-4 shrink-0">{renderPilulasFaixas()}</div>
 
             {/* Campo de busca no modal */}

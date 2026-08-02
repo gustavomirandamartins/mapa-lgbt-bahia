@@ -439,7 +439,7 @@ export function BahiaMap({ indices, municipios }: BahiaMapProps) {
   const idsFaixaSelecionada = useMemo(() => {
     if (!faixaSelecionada) return null;
     const set = new Set<number>();
-    if (faixaSelecionada === "sem_avaliacao") {
+    if (faixaSelecionada === "sem_avaliacao" || faixaSelecionada === "Sem Respostas") {
       for (const m of municipios) {
         if (!indicesPorMunicipio.has(m.id)) {
           set.add(m.id);

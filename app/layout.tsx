@@ -13,13 +13,13 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  applicationName: "IDT-LGBT Bahia",
+  applicationName: "PLATUR-LGBT+ Bahia",
   title: {
-    default: "IDT-LGBT · Mapa do Turismo LGBTQIAPN+ na Bahia",
-    template: "%s · IDT-LGBT Bahia",
+    default: "PLATUR-LGBT+ · Plataforma de Mapeamento do Turismo LGBTQIAPN+ Municipal na Bahia",
+    template: "%s · PLATUR-LGBT+ Bahia",
   },
   description:
-    "Mapa interativo do Índice de Desenvolvimento do Turismo LGBTQIAPN+ (IDT-LGBT) dos 417 municípios da Bahia. Uma tecnologia de gestão social da SETUR-BA.",
+    "Plataforma de Mapeamento do Turismo LGBTQIAPN+ Municipal dos 417 municípios da Bahia. Uma tecnologia de gestão social da SETUR-BA.",
   icons: {
     icon: [
       {
@@ -41,7 +41,7 @@ export const metadata: Metadata = {
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
-    title: "IDT Bahia",
+    title: "PLATUR-LGBT+",
   },
   formatDetection: { telephone: false },
 };
