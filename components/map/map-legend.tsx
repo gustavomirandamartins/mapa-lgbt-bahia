@@ -211,7 +211,7 @@ export function MapLegend({
           <div className="flex items-center gap-2">
             <Search className="size-4 text-[#1880fb]" />
             <span className="text-xs font-extrabold text-[#1e293b]">
-              Buscar ({listaMunicipios.length || 417} cidades)...
+              Buscar cidade ({listaMunicipios.length || 417})...
             </span>
           </div>
           <span className="rounded-full bg-[#1880fb]/10 px-2.5 py-0.5 text-[10px] font-extrabold text-[#1880fb]">
@@ -240,16 +240,17 @@ export function MapLegend({
             {/* Filtros por status de cores no mobile */}
             <div className="mb-4 shrink-0">{renderPilulasFaixas()}</div>
 
-            {/* Campo de busca no modal */}
+            {/* Campo de busca no modal (sem autoFocus para não abrir teclado sem clique explícito em Buscar cidade) */}
             <div className="relative mb-3.5 shrink-0">
               <Search className="pointer-events-none absolute top-1/2 left-3 size-3.5 -translate-y-1/2 text-[#64748b]" />
               <input
                 type="text"
+                inputMode="search"
+                enterKeyHint="search"
                 value={busca}
                 onChange={(e) => setBusca(e.target.value)}
                 placeholder={`Buscar cidade (${listaMunicipios.length || 417})...`}
                 className="neuro-inset w-full rounded-2xl py-2.5 pr-8 pl-9 text-xs font-semibold text-[#2c3444] placeholder-[#94a3b8] outline-none"
-                autoFocus
               />
               {busca && (
                 <button
