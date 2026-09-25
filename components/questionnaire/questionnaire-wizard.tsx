@@ -35,6 +35,8 @@ export function QuestionnaireWizard({ nomeMunicipio }: { nomeMunicipio: string }
 
   const [confirmandoEnvio, setConfirmandoEnvio] = useState(false);
 
+  const eixoAtual = IDT_QUESTIONARIO[etapa];
+
   const tiposPorPergunta = useMemo(() => {
     const mapa = new Map<string, string>();
     for (const eixo of IDT_QUESTIONARIO) {
