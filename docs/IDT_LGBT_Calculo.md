@@ -1,5 +1,7 @@
 # CÁLCULO DO ÍNDICE DE DESENVOLVIMENTO DO TURISMO LGBTQIAPN+ (IDT-LGBT)
 
+> ⚠️ **Documento histórico**: descreve a metodologia de pontuação anterior (0–100, pesos por eixo). A metodologia vigente é de **mapeamento, sem pontuação** — o questionário oficial está em `lib/idt.ts` (`IDT_QUESTIONARIO`).
+
 ## Fórmula Geral
 
 $$IDT - LGBT = \sum (Peso\ do\ Eixo 	imes Nota\ do\ Eixo)$$

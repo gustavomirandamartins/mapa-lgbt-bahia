@@ -1,5 +1,7 @@
 # 6 ÍNDICE DE DESENVOLVIMENTO DO TURISMO LGBTQIAPN+ (IDT-LGBT+)
 
+> ⚠️ **Documento histórico**: a metodologia de pontuação aqui descrita foi substituída pela metodologia de **mapeamento, sem pontuação**. O questionário oficial vigente está em `lib/idt.ts` (`IDT_QUESTIONARIO`).
+
 Como tecnologia a ser desenvolvida nessa pesquisa, propõe-se a criação de um Índice de Desenvolvimento do Turismo LGBTQIAPN+ (IDT-LGBT), que se constitui enquanto um instrumento de diagnóstico, planejamento e monitoramento destinado a avaliar o nível de desenvolvimento das políticas e ações voltadas ao segmento LGBTQIAPN+ nos municípios brasileiros. A proposta fundamenta-se na compreensão de que o desenvolvimento do turismo inclusivo requer não apenas ações de promoção ou inserção mercadológica, mas também a implementação de políticas públicas integradas que articulem governança, direitos humanos, segurança, produção de dados, qualificação profissional e participação social.
 
 A elaboração do índice parte do entendimento de que o turismo é um fenômeno multidimensional e transversal, cuja gestão demanda a integração de diferentes atores e políticas públicas (Hall, 2004). No caso do Turismo LGBTQIAPN+, essa perspectiva se torna ainda mais relevante, uma vez que as experiências turísticas desse segmento estão diretamente relacionadas à existência de ambientes seguros, acolhedores e livres de discriminação (HUGHES, 2006).

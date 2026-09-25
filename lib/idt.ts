@@ -603,10 +603,55 @@ export const TOTAL_PERGUNTAS = IDT_QUESTIONARIO.reduce(
 );
 
 /**
+ * Valida as respostas contra o questionário oficial.
+ * - Perguntas "radio" são obrigatórias e o valor deve ser uma das opções.
+ * - Perguntas "checkbox" são opcionais, mas se presentes devem ser um array
+ *   contendo apenas valores das opções.
+ * - Perguntas "text" são opcionais e aceitam qualquer string.
+ * Lança Error quando alguma regra é violada.
+ */
+export function validarRespostas(respostas: IdtRespostas): void {
+  if (!respostas || typeof respostas !== "object") {
+    throw new Error("Respostas ausentes ou em formato inválido.");
+  }
+  for (const eixo of IDT_QUESTIONARIO) {
+    for (const pergunta of eixo.perguntas) {
+      const valor = respostas[pergunta.id];
+      const validos = (pergunta.opcoes ?? []).map((opcao) => opcao.valor);
+      if (pergunta.tipo === "radio") {
+        if (valor === undefined || valor === null || valor === "") {
+          throw new Error(`Pergunta sem resposta: ${pergunta.id}`);
+        }
+        if (!validos.includes(valor as string)) {
+          throw new Error(
+            `Valor inválido (${String(valor)}) para a pergunta ${pergunta.id}`
+          );
+        }
+      } else if (pergunta.tipo === "checkbox") {
+        if (valor === undefined || valor === null || valor === "") continue;
+        if (
+          !Array.isArray(valor) ||
+          !valor.every((item) => validos.includes(item as string))
+        ) {
+          throw new Error(
+            `Valor inválido para a pergunta ${pergunta.id} (checkbox)`
+          );
+        }
+      } else if (valor !== undefined && valor !== null && typeof valor !== "string") {
+        throw new Error(
+          `Valor inválido para a pergunta ${pergunta.id} (texto esperado)`
+        );
+      }
+    }
+  }
+}
+
+/**
  * Processa/calcula o resultado do mapeamento municipal a partir das respostas.
  * Não existem pesos ou pontuação — o resultado agrega as respostas organizadas.
  */
 export function calcularIdt(respostas: IdtRespostas): IdtResultado {
+  validarRespostas(respostas);
   const eixos: IdtResultadoEixo[] = IDT_QUESTIONARIO.map((eixo) => {
     const resEixo: Record<string, IdtValorResposta> = {};
     for (const perg of eixo.perguntas) {

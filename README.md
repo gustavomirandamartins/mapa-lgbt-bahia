@@ -7,7 +7,7 @@
 [![Supabase](https://img.shields.io/badge/Supabase-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white)](https://supabase.com/)
 [![MapLibre GL](https://img.shields.io/badge/MapLibre%20GL-3178C6?style=for-the-badge&logo=maplibre&logoColor=white)](https://maplibre.org/)
 
-Aplicativo full-stack mobile-first (PWA) para mapeamento, acompanhamento e exibição pública do **Índice de Desenvolvimento do Turismo LGBTQIAPN+ (IDT-LGBT)** nos **417 municípios do Estado da Bahia**.
+Aplicativo full-stack mobile-first para mapeamento, acompanhamento e exibição pública do **Índice de Desenvolvimento do Turismo LGBTQIAPN+ (IDT-LGBT)** nos **417 municípios do Estado da Bahia**.
 
 ---
 
@@ -15,37 +15,34 @@ Aplicativo full-stack mobile-first (PWA) para mapeamento, acompanhamento e exibi
 
 O **IDT-LGBT Bahia** é uma plataforma que conecta gestão pública municipal, coordenação estadual e o público em geral. A aplicação combina:
 
-- **Mapa Coroplético Interativo (100% Local)**: Visualização cartográfica dos 417 municípios da Bahia utilizando geometrias oficiais do IBGE, coloridas de acordo com a maturidade turística LGBTQIAPN+ e renderizadas em MapLibre GL sem dependência de tiles externos.
-- **Transparência e Raio-X Municipal**: Cards de detalhe com gráfico de radar (desempenho nos 7 eixos), destaques para pontos fortes, fragilidades e recomendações de políticas públicas.
+- **Mapa Coroplético Interativo (100% Local)**: Visualização cartográfica dos 417 municípios da Bahia utilizando geometrias oficiais do IBGE, coloridas por status de mapeamento (verde = Mapeado, cinza = Não Mapeado) e renderizadas em MapLibre GL sem dependência de tiles externos.
+- **Transparência e Raio-X Municipal**: Cards de detalhe com as respostas completas aos 7 eixos, dados do IBGE (população, área, PIB, IDH) e zona turística de cada município.
 - **Central de Controle (Gestores Municipais e Administração)**: Painéis autenticados para submissão de questionário municipal, fluxo de revisão, moderação e aprovação de avaliações.
 
 ---
 
-## 📊 Metodologia do IDT-LGBT
+## 📊 Metodologia (TGS-DT — Mapeamento, sem pontuação)
 
-O índice mede o grau de estruturação de um município para acolher, promover e desenvolver o turismo voltado à comunidade LGBTQIAPN+, com nota final em escala de **0 a 100 pontos**, dividida em **5 faixas de classificação**:
+A metodologia atual é de **mapeamento**: não há pesos, notas por eixo nem escala 0–100. O questionário coleta respostas (rádio, múltipla escolha e texto livre) e o município avaliado recebe o status abaixo. Por compatibilidade de schema, `nota_final` é gravada como `100`.
 
-| Faixa de Pontuação | Nível de Maturidade | Cor Oficial |
-| :---: | :--- | :--- |
-| **0 – 19** | ⚪ Inexistente | Cinza (`#94a3b8`) |
-| **20 – 39** | 🔴 Inicial | Vermelho (`#ef4444`) |
-| **40 – 59** | 🟠 Emergente | Laranja (`#f97316`) |
-| **60 – 79** | 🟡 Estruturado | Amarelo (`#facc15`) |
-| **80 – 100** | 🟢 Referência | Verde (`#22c55e`) |
+| Status | Condição | Cor no mapa |
+| :--- | :--- | :--- |
+| 🟢 **Mapeado** | Possui avaliação aprovada | Verde (`#10b981`) |
+| ⚪ **Não Mapeado** | Sem avaliação aprovada | Cinza (`#94a3b8`) |
 
-### Os 7 Eixos Avaliados (35 Perguntas)
+### Os 7 Eixos Avaliados (49 Perguntas)
 
-O questionário oficial abrange 35 perguntas distribuídas em 7 eixos temáticos com pesos diferenciados na composição da nota final:
+O questionário oficial abrange 49 perguntas distribuídas em 7 eixos temáticos (perguntas de rádio obrigatórias; checkbox e texto livre complementares):
 
-1. **Governança (20%)**: Estrutura institucional, dotação orçamentária, conselhos municipais e planos de turismo.
-2. **Legislação e Direitos Humanos (15%)**: Leis antidiscriminação, adoção de nome social, combate à LGBTfobia e direitos civis.
-3. **Pesquisa e Dados (15%)**: Monitoramento do perfil, fluxo e satisfação do turista LGBTQIAPN+, além de dados de violência.
-4. **Qualificação (15%)**: Treinamento e capacitação do trade turístico, servidores públicos e segurança pública.
-5. **Promoção Turística (10%)**: Participação em feiras, campanhas específicas, material promocional e calendário de eventos.
-6. **Segurança e Proteção (15%)**: Delegacias especializadas, protocolos de acolhimento e canais de denúncia de LGBTfobia.
-7. **Oferta Turística (10%)**: Existência de estabelecimentos focados ou *LGBT-friendly* (meios de hospedagem, entretenimento, gastronomia).
+1. **Governança**: Estrutura institucional, dotação orçamentária, conselhos municipais e planos de turismo.
+2. **Legislação e Direitos Humanos**: Leis antidiscriminação, adoção de nome social, combate à LGBTfobia e direitos civis.
+3. **Pesquisa e Dados**: Monitoramento do perfil, fluxo e satisfação do turista LGBTQIAPN+, além de dados de violência.
+4. **Qualificação**: Treinamento e capacitação do trade turístico, servidores públicos e segurança pública.
+5. **Promoção Turística**: Participação em feiras, campanhas específicas, material promocional e calendário de eventos.
+6. **Segurança e Proteção**: Delegacias especializadas, protocolos de acolhimento e canais de denúncia de LGBTfobia.
+7. **Oferta Turística**: Existência de estabelecimentos focados ou *LGBT-friendly* (meios de hospedagem, entretenimento, gastronomia).
 
-> 📖 **Fonte da Verdade Metodológica**: Consulte os documentos oficiais em [`docs/IDT_LGBT_Calculo.md`](file:///Users/gustavomartins/Projetos/setur/mapa-lgbt-bahia/docs/IDT_LGBT_Calculo.md) e [`docs/IDT_LGBT_Completo.md`](file:///Users/gustavomartins/Projetos/setur/mapa-lgbt-bahia/docs/IDT_LGBT_Completo.md).
+> 📖 **Fonte da Verdade Metodológica**: o questionário vigente está em [`lib/idt.ts`](./lib/idt.ts) (`IDT_QUESTIONARIO`). Os documentos [`docs/IDT_LGBT_Calculo.md`](./docs/IDT_LGBT_Calculo.md) e [`docs/IDT_LGBT_Completo.md`](./docs/IDT_LGBT_Completo.md) descrevem a metodologia de pontuação anterior (0–100) e são mantidos apenas como referência histórica.
 
 ---
 
@@ -59,7 +56,7 @@ O questionário oficial abrange 35 perguntas distribuídas em 7 eixos temáticos
   - A tabela `avaliacoes` expõe para usuários anônimos apenas avaliações aprovadas através da view segura `indice_publico` (`security_invoker = true`).
   - **Zero chaves de serviço no frontend**: Segurança ponta a ponta sem segredos expostos no cliente.
 - **MapLibre GL v6**: Renderização vetorial e interativa sem servidor de tiles externo. O mapa utiliza arquivos GeoJSON estáticos em `public/geo/`. O worker é servido localmente de `public/vendor/maplibre-gl-worker.mjs`.
-- **Motor do IDT (`lib/idt.ts`)**: Módulo universal e autocontido **sem dependências de runtime**, executável tanto no Next.js quanto nativamente no Node.js. Toda submissão é recalculada no servidor.
+- **Motor do IDT (`lib/idt.ts`)**: Módulo universal e autocontido **sem dependências de runtime**, executável tanto no Next.js quanto nativamente no Node.js. Toda submissão é validada e processada no servidor.
 
 ---
 
@@ -76,28 +73,34 @@ O questionário oficial abrange 35 perguntas distribuídas em 7 eixos temáticos
 
 ```text
 ├── app/                      # Rotas da aplicação (Next.js 16 App Router)
-│   ├── admin/                # Central de administração
+│   ├── admin/                # Central de administração (+ alterar senha)
 │   ├── cadastro/             # Cadastro de gestores municipais
+│   ├── dashboard/            # Panorama público dos resultados do mapeamento
 │   ├── login/                # Autenticação (Supabase Auth)
-│   ├── painel/               # Painel do município e questionário IDT
+│   ├── painel/               # Painel do município e questionário
 │   ├── globals.css           # Tokens @theme Tailwind v4 e classes utilitárias
+│   ├── manifest.ts           # Manifesto Web (ícones locais em public/icons)
 │   └── page.tsx              # Mapa público interativo da Bahia
 ├── components/               # Componentes React
-│   ├── map/                  # Mapa MapLibre GL, card municipal, legenda e gráfico radar
-│   ├── questionnaire/        # Wizard interativo de 35 perguntas
-│   └── ui/                   # Cards, logotipos e elementos de UI
-├── docs/                     # Documentação oficial da metodologia
+│   ├── map/                  # Mapa MapLibre GL, card municipal e legenda
+│   ├── questionnaire/        # Wizard interativo de 49 perguntas
+│   ├── dashboard/            # Componentes do painel de resultados
+│   └── ui/                   # AuroraCard, logotipos e elementos de UI
+├── docs/                     # Metodologia de pontuação anterior (referência histórica)
 ├── lib/                      # Lógica de negócios e integrações
 │   ├── actions/              # Next.js Server Actions (auth, avaliações, admin)
-│   ├── idt.ts                # Motor de cálculo do IDT-LGBT (módulo universal)
-│   ├── idt.test.ts           # Suíte de testes unitários do motor (Node.js test runner)
+│   ├── idt.ts                # Questionário vigente + processamento (módulo universal)
+│   ├── idt.test.ts           # Suíte de testes unitários (Node.js test runner)
 │   ├── auth-guards.ts        # Guards de autenticação e permissões de perfil
+│   ├── dashboard-data.ts     # Agregações para o dashboard público
+│   ├── ibge-data.ts          # Dados estáticos do IBGE por município
 │   └── public-data.ts        # Agregador de dados para o mapa público
 ├── public/                   # Ativos estáticos, geometrias e workers
-│   ├── geo/                  # GeoJSONs dos municípios e contornos da Bahia
+│   ├── geo/                  # GeoJSONs (municípios, contorno, terra, água)
+│   ├── icons/                # Ícones PWA locais
 │   └── vendor/               # Workers locais do MapLibre GL
 └── supabase/                 # Configurações do banco de dados
-    └── migrations/           # Migrações SQL (Schema, RLS, Seed de Municípios e Views)
+    └── migrations/           # Migrações SQL (schema, RLS, seed, views)
 ```
 
 ---
@@ -136,7 +139,11 @@ No **SQL Editor** do painel do Supabase, execute as migrações em ordem (ou via
 1. `supabase/migrations/0001_schema.sql`: Estrutura das tabelas (`profiles`, `municipios`, `avaliacoes`) e triggers de autenticação.
 2. `supabase/migrations/0002_policies.sql`: Políticas de segurança em nível de linha (RLS).
 3. `supabase/migrations/0003_seed_municipios.sql`: População inicial dos 417 municípios da Bahia.
-4. `supabase/migrations/0004_view_security_invoker.sql`: Criação da view `indice_publico` respeitando `security_invoker = true`.
+4. `supabase/migrations/0004_view_security_invoker.sql`: View `indice_publico` com `security_invoker = true` e acesso do anon restrito por colunas.
+5. `supabase/migrations/0005_platur_mapeamento.sql`: Metodologia de mapeamento e exposição da coluna `respostas`.
+6. `supabase/migrations/0006_fix_avaliacoes_aprovadas_verde.sql`: Normalização das avaliações aprovadas (`Mapeado`).
+7. `supabase/migrations/0007_fix_permissoes_e_rls.sql`: Permissões de leitura das tabelas e da view.
+8. `supabase/migrations/0008_restringe_colunas_anon.sql`: Restaura o menor privilégio do anon (colunas públicas + `respostas`, sem `user_id`).
 
 Para criar o **primeiro usuário administrador**, crie a conta em *Authentication* no Supabase e execute o SQL indicado no comentário final da migração `0001_schema.sql`:
 
@@ -164,17 +171,18 @@ npm run build
 
 ## 🧪 Testes Unitários do Motor IDT
 
-O motor de cálculo (`lib/idt.ts`) é rigorosamente testado nativamente via Node.js Test Runner:
+O motor (`lib/idt.ts`) é rigorosamente testado nativamente via Node.js Test Runner:
 
 ```bash
 npm test
 ```
 
 A suíte em `lib/idt.test.ts` valida:
-- Consistência dos pesos e escalas dos 7 eixos (100% de soma total).
-- Retorno correto das 5 faixas de classificação.
-- Destaques automáticos dos 2 principais pontos fortes, fragilidades e recomendações para eixos abaixo de 50%.
-- Rejeição de respostas inválidas ou fora das escalas de pontuação permitidas.
+- Estrutura do questionário vigente: 7 eixos e 49 perguntas.
+- Processamento das respostas sem pontuação, com classificação "Mapeado".
+- Discriminação dos status "Mapeado" vs "Não Mapeado".
+- Formatação de respostas (listas, booleanos, vazios e strings).
+- Validação server-side: rádio obrigatório com valor inválido/ausente é rejeitado.
 
 ---
 

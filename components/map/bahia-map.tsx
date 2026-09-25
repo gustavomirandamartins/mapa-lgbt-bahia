@@ -17,7 +17,7 @@ import { MapLegend } from "@/components/map/map-legend";
 
 /**
  * Estilo 100% local: sem tiles externos — os GeoJSONs do mapa fornecem toda a
- * geometria. Funciona offline (PWA) e carrega instantaneamente.
+ * geometria. Carrega instantaneamente (rótulos dependem de rede para os glifos).
  */
 const ESTILO_LOCAL: StyleSpecification = {
   version: 8,
