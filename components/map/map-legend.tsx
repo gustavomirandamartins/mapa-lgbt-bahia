@@ -1,9 +1,9 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Search, X } from "lucide-react";
 
-import { CLASSIFICACOES, classificar } from "@/lib/idt";
+import { CLASSIFICACOES } from "@/lib/idt";
 import type { IndicePublico } from "@/lib/public-data";
 import type { Municipio } from "@/lib/auth-guards";
 
@@ -31,6 +31,15 @@ export function MapLegend({
   const [busca, setBusca] = useState("");
   const [mobileOpen, setMobileOpen] = useState(false);
 
+  useEffect(() => {
+    if (!mobileOpen) return;
+    const aoTeclar = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setMobileOpen(false);
+    };
+    window.addEventListener("keydown", aoTeclar);
+    return () => window.removeEventListener("keydown", aoTeclar);
+  }, [mobileOpen]);
+
   const indicesPorId = useMemo(() => {
     const map = new Map<number, IndicePublico>();
     for (const ind of indices) {
@@ -54,14 +63,13 @@ export function MapLegend({
 
   const municipiosFiltrados = useMemo(() => {
     let lista = listaMunicipios;
+    // faixaSelecionada só assume valores de CLASSIFICACOES[].faixa
+    // ("Com Respostas" | "Sem Respostas"), vindos das pílulas abaixo.
     if (faixaSelecionada) {
+      const soMapeados = faixaSelecionada === CLASSIFICACOES[0].faixa;
       lista = lista.filter((m) => {
         const ind = indicesPorId.get(m.id);
-        if (faixaSelecionada === "sem_avaliacao" || faixaSelecionada === "Sem Respostas") {
-          return !ind;
-        }
-        if (!ind) return false;
-        return faixaSelecionada === "Com Respostas" || faixaSelecionada === "Mapeado" || classificar(ind.nota_final).faixa === faixaSelecionada;
+        return soMapeados ? Boolean(ind) : !ind;
       });
     }
     if (!busca.trim()) return lista;

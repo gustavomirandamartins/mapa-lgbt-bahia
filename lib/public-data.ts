@@ -17,29 +17,43 @@ export interface IndicePublico {
  * Cliente anônimo sem cookies: usado apenas para dados públicos do mapa.
  * Mantém a página inicial estática/cacheável (revalidate).
  */
-function createAnonClient() {
+function createAnonClient(revalidateSeconds: number | "no-store" = "no-store") {
   return createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
       auth: { persistSession: false, autoRefreshToken: false },
       global: {
-        fetch: (url, options) => fetch(url, { ...options, cache: "no-store" }),
+        fetch: (url, options) =>
+          fetch(url, {
+            ...options,
+            ...(revalidateSeconds === "no-store"
+              ? { cache: "no-store" as const }
+              : { next: { revalidate: revalidateSeconds } }),
+          }),
       },
     }
   );
 }
 
-export async function getIndicesPublicos(): Promise<IndicePublico[]> {
+export async function getIndicesPublicos(
+  revalidateSeconds: number | "no-store" = "no-store"
+): Promise<IndicePublico[]> {
   try {
-    const { data, error } = await createAnonClient()
+    // Sem a coluna `respostas` (JSONB pesado): card e dashboard já leem as
+    // respostas agregadas em `notas_eixos[].respostas`. `nota_final` é
+    // normalizada para number (PostgREST pode serializar numeric como string).
+    const { data, error } = await createAnonClient(revalidateSeconds)
       .from("indice_publico")
-      .select("municipio_id, nome, nota_final, classificacao, notas_eixos, respostas, submitted_at");
+      .select("municipio_id, nome, nota_final, classificacao, notas_eixos, submitted_at");
     if (error) {
       console.error("Erro em getIndicesPublicos (Supabase):", error.message, error.details, error.hint);
       return [];
     }
-    return (data ?? []) as IndicePublico[];
+    return (data ?? []).map((row) => ({
+      ...(row as IndicePublico),
+      nota_final: Number((row as IndicePublico).nota_final),
+    }));
   } catch (err) {
     console.error("Exceção em getIndicesPublicos:", err);
     return [];

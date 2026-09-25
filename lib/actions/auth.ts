@@ -99,8 +99,10 @@ export async function alterarSenha(
   _prevState: AlterarSenhaState,
   formData: FormData
 ): Promise<AlterarSenhaState> {
-  const password = String(formData.get("password") ?? "").trim();
-  const confirmPassword = String(formData.get("confirmPassword") ?? "").trim();
+  // Sem .trim(): espaços fazem parte da senha e não devem ser alterados
+  // silenciosamente.
+  const password = String(formData.get("password") ?? "");
+  const confirmPassword = String(formData.get("confirmPassword") ?? "");
 
   if (!password || !confirmPassword) {
     return { error: "Preencha a nova senha e a confirmação." };

@@ -33,10 +33,13 @@ export function CadastroForm({ municipios }: { municipios: Municipio[] }) {
           name="municipio_id"
           required
           defaultValue=""
-          className="w-full bg-transparent text-base outline-none"
+          disabled={municipios.length === 0}
+          className="w-full bg-transparent text-base outline-none disabled:opacity-60"
         >
           <option value="" disabled>
-            Selecione o município
+            {municipios.length === 0
+              ? "Lista indisponível — recarregue a página"
+              : "Selecione o município"}
           </option>
           {municipios.map((municipio) => (
             <option key={municipio.id} value={municipio.id}>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   ArrowLeft,
@@ -33,10 +33,23 @@ export function QuestionnaireWizard({ nomeMunicipio }: { nomeMunicipio: string }
     classificacao: string;
   } | null>(null);
 
-  const eixoAtual = IDT_QUESTIONARIO[etapa];
+  const [confirmandoEnvio, setConfirmandoEnvio] = useState(false);
+
+  const tiposPorPergunta = useMemo(() => {
+    const mapa = new Map<string, string>();
+    for (const eixo of IDT_QUESTIONARIO) {
+      for (const pergunta of eixo.perguntas) {
+        mapa.set(pergunta.id, pergunta.tipo);
+      }
+    }
+    return mapa;
+  }, []);
   const respondidas = Object.keys(respostas).filter((id) => {
     const val = respostas[id];
     if (Array.isArray(val)) return val.length > 0;
+    if (typeof val === "string" && tiposPorPergunta.get(id) === "text") {
+      return val.trim() !== "";
+    }
     return val !== undefined && val !== "";
   }).length;
   const progresso = Math.round((respondidas / TOTAL_PERGUNTAS) * 100);
@@ -54,6 +67,16 @@ export function QuestionnaireWizard({ nomeMunicipio }: { nomeMunicipio: string }
     isPerguntaRespondida(pergunta.id, pergunta.tipo)
   );
   const ultimaEtapa = etapa === IDT_QUESTIONARIO.length - 1;
+
+  // Resumo por eixo para a tela de revisão antes do envio final.
+  const resumoEnvio = IDT_QUESTIONARIO.map((eixo) => {
+    const radios = eixo.perguntas.filter((p) => p.tipo === "radio");
+    const respondidos = radios.filter((p) => {
+      const v = respostas[p.id];
+      return v !== undefined && v !== "";
+    }).length;
+    return { eixo, total: radios.length, respondidos };
+  });
 
   async function handleSubmit() {
     setEnviando(true);
@@ -249,6 +272,7 @@ export function QuestionnaireWizard({ nomeMunicipio }: { nomeMunicipio: string }
                       }))
                     }
                     placeholder={pergunta.placeholder ?? "Descreva aqui..."}
+                    maxLength={2000}
                     className="neuro-inset w-full rounded-xl px-4 py-3 text-sm font-semibold text-[#2c3444] placeholder-[#94a3b8] outline-none transition-all focus:ring-2 focus:ring-[#1880fb]/30"
                   />
                 </div>
@@ -264,11 +288,69 @@ export function QuestionnaireWizard({ nomeMunicipio }: { nomeMunicipio: string }
         </p>
       )}
 
+      {/* Revisão antes do envio final */}
+      {confirmandoEnvio && ultimaEtapa && (
+        <div className="animate-fade-in mt-4 rounded-2xl border border-white/60 bg-white/50 p-4">
+          <p className="text-sm font-bold text-[#2c3444]">
+            Revise antes de enviar
+          </p>
+          <p className="mt-1 text-xs text-neutral-500">
+            Perguntas obrigatórias (rádio) respondidas por eixo. Volte às
+            etapas anteriores para corrigir, se preciso.
+          </p>
+          <ul className="mt-3 flex flex-col gap-1.5">
+            {resumoEnvio.map(({ eixo, total, respondidos }) => (
+              <li
+                key={eixo.id}
+                className="flex items-center justify-between gap-2 text-xs font-semibold"
+              >
+                <span className="text-neutral-600">{eixo.nome}</span>
+                <span
+                  className={
+                    respondidos === total
+                      ? "text-emerald-600"
+                      : "text-amber-600"
+                  }
+                >
+                  {respondidos}/{total}
+                </span>
+              </li>
+            ))}
+          </ul>
+          <div className="mt-3 flex gap-2">
+            <button
+              type="button"
+              onClick={() => setConfirmandoEnvio(false)}
+              disabled={enviando}
+              className="glass-soft flex-1 rounded-xl px-4 py-2.5 text-sm font-semibold text-neutral-600 transition-transform active:scale-[0.98] disabled:opacity-40"
+            >
+              Revisar respostas
+            </button>
+            <button
+              type="button"
+              onClick={handleSubmit}
+              disabled={enviando}
+              className="pride-gradient flex flex-1 items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-bold text-white shadow-lg transition-transform active:scale-[0.98] disabled:opacity-50"
+            >
+              {enviando ? (
+                <Loader2 className="size-4 animate-spin" aria-hidden />
+              ) : (
+                <Send className="size-4" aria-hidden />
+              )}
+              {enviando ? "Enviando…" : "Confirmar envio"}
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Navegação */}
       <div className="mt-6 flex items-center gap-3">
         <button
           type="button"
-          onClick={() => setEtapa((atual) => Math.max(0, atual - 1))}
+          onClick={() => {
+            setConfirmandoEnvio(false);
+            setEtapa((atual) => Math.max(0, atual - 1));
+          }}
           disabled={etapa === 0 || enviando}
           className="glass-soft flex items-center gap-2 rounded-2xl px-4 py-3 text-sm font-semibold text-neutral-600 transition-transform active:scale-[0.98] disabled:opacity-40"
         >
@@ -279,7 +361,13 @@ export function QuestionnaireWizard({ nomeMunicipio }: { nomeMunicipio: string }
         {ultimaEtapa ? (
           <button
             type="button"
-            onClick={handleSubmit}
+            onClick={() => {
+              if (confirmandoEnvio) {
+                handleSubmit();
+              } else {
+                setConfirmandoEnvio(true);
+              }
+            }}
             disabled={!etapaCompleta || enviando}
             className="pride-gradient flex flex-1 items-center justify-center gap-2 rounded-2xl px-4 py-3 text-sm font-bold text-white shadow-lg transition-transform active:scale-[0.98] disabled:opacity-50"
           >
@@ -288,7 +376,11 @@ export function QuestionnaireWizard({ nomeMunicipio }: { nomeMunicipio: string }
             ) : (
               <Send className="size-4" aria-hidden />
             )}
-            {enviando ? "Enviando…" : "Enviar respostas do mapeamento"}
+            {enviando
+              ? "Enviando…"
+              : confirmandoEnvio
+                ? "Confirmar envio"
+                : "Revisar e enviar"}
           </button>
         ) : (
           <button

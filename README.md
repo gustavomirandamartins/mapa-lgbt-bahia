@@ -64,7 +64,7 @@ O questionário oficial abrange 49 perguntas distribuídas em 7 eixos temáticos
 
 1. **Cadastro Municipal (`pendente`)**: O representante municipal cria conta vinculando-se a um dos 417 municípios em `/cadastro`.
 2. **Aprovação de Perfil (`aprovado`)**: A administração revisa e autoriza o gestor municipal através do painel administrativo (`/admin`).
-3. **Submissão da Avaliação (`pendente`)**: O gestor municipal autenticado responde ao questionário com os 7 eixos em `/painel`.
+3. **Submissão da Avaliação (`pendente`)**: O gestor municipal autenticado responde ao questionário com os 7 eixos em `/painel`, com tela de revisão antes do envio final. As respostas de rádio são obrigatórias e **validadas também no servidor** (`validarRespostas` em `lib/idt.ts`).
 4. **Publicação no Mapa (`aprovado`)**: A administração analisa a avaliação em `/admin/avaliacoes/[id]`. Ao ser aprovada, a avaliação torna-se pública no mapa e substitui automaticamente a versão anterior (`substituida`).
 
 ---
@@ -168,6 +168,12 @@ npm run build
 ```
 
 ---
+
+## ✨ Notas de Implementação
+
+- **Mapa**: oceano com animação sutil (padrão em canvas atualizado via `map.updateImage`), desligada automaticamente com `prefers-reduced-motion`; contorno do estado com glow; zoom respeita movimento reduzido. Geometrias em `public/geo/` (a de Madre de Deus/2919926 é a simplificada oficial do IBGE).
+- **Leituras públicas**: `getIndicesPublicos()` não traz a coluna pesada `respostas` (card e dashboard usam `notas_eixos[].respostas`) e normaliza `nota_final` para número; o `/dashboard` reaproveita cache de 60s.
+- **Formulários**: textos do questionário limitados a 2000 caracteres; alteração de senha não remove espaços; `select` de município explica quando a lista está indisponível.
 
 ## 🧪 Testes Unitários do Motor IDT
 

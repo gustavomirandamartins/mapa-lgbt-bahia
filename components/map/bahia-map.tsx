@@ -9,7 +9,7 @@ import {
 import "maplibre-gl/dist/maplibre-gl.css";
 import { Maximize, Minus, Plus } from "lucide-react";
 
-import { COR_SEM_DADOS, classificar } from "@/lib/idt";
+import { COR_SEM_DADOS, classificar, corDaNota } from "@/lib/idt";
 import type { IndicePublico } from "@/lib/public-data";
 import type { Municipio } from "@/lib/auth-guards";
 import { MunicipioCard } from "@/components/map/municipio-card";
@@ -55,6 +55,31 @@ const FULL_WORLD_OCEAN: GeoJSON.FeatureCollection = {
   ],
 };
 
+/**
+ * Bolhas do mar animado (posições determinísticas; o movimento vem do tempo).
+ * Tons claros sobre base #e9eef6 para manter o tema neumórfico.
+ */
+const BOLHAS_MAR: {
+  x: number;
+  y: number;
+  r: number;
+  dx: number;
+  dy: number;
+  freq: number;
+  fase: number;
+  cor: string;
+  alpha: number;
+}[] = [
+  { x: 40, y: 60, r: 90, dx: 26, dy: 20, freq: 0.42, fase: 0.4, cor: "211,222,242", alpha: 0.2 },
+  { x: 150, y: 30, r: 70, dx: 20, dy: 28, freq: 0.55, fase: 1.7, cor: "194,212,236", alpha: 0.18 },
+  { x: 220, y: 120, r: 100, dx: 30, dy: 22, freq: 0.38, fase: 2.9, cor: "255,255,255", alpha: 0.22 },
+  { x: 90, y: 170, r: 80, dx: 24, dy: 30, freq: 0.5, fase: 4.1, cor: "185,205,232", alpha: 0.16 },
+  { x: 200, y: 210, r: 95, dx: 28, dy: 18, freq: 0.62, fase: 5.3, cor: "211,222,242", alpha: 0.2 },
+  { x: 30, y: 230, r: 60, dx: 18, dy: 24, freq: 0.47, fase: 0.9, cor: "255,255,255", alpha: 0.18 },
+  { x: 120, y: 110, r: 55, dx: 22, dy: 26, freq: 0.58, fase: 3.6, cor: "194,212,236", alpha: 0.14 },
+  { x: 240, y: 60, r: 65, dx: 16, dy: 20, freq: 0.44, fase: 2.2, cor: "185,205,232", alpha: 0.14 },
+];
+
 /** Bounding box do estado da Bahia (ampliado para visualização completa sem cortes). */
 const BAHIA_BOUNDS: [[number, number], [number, number]] = [
   [-47.45, -19.05],
@@ -92,6 +117,29 @@ export function BahiaMap({ indices, municipios }: BahiaMapProps) {
     return mapa;
   }, [municipios]);
 
+  const movimentoReduzido = useMemo(
+    () =>
+      typeof window !== "undefined" &&
+      typeof window.matchMedia === "function" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches,
+    []
+  );
+
+  const voarPara = (center: [number, number]) => {
+    const map = mapRef.current;
+    if (!map) return;
+    if (movimentoReduzido) {
+      map.jumpTo({ center });
+      return;
+    }
+    map.flyTo({
+      center,
+      zoom: Math.max(map.getZoom(), 9.2),
+      duration: 750,
+      essential: true,
+    });
+  };
+
   const obterCorPreenchimento = (listaIndices: IndicePublico[]) => {
     const COR_PADRAO_MAPA = COR_SEM_DADOS;
     if (listaIndices.length === 0) return COR_PADRAO_MAPA;
@@ -100,7 +148,7 @@ export function BahiaMap({ indices, municipios }: BahiaMapProps) {
       ["to-number", ["get", "codarea"]],
     ];
     for (const indice of listaIndices) {
-      expressao.push(indice.municipio_id, "#10b981");
+      expressao.push(indice.municipio_id, corDaNota(indice.nota_final));
     }
     expressao.push(COR_PADRAO_MAPA);
     return expressao;
@@ -135,6 +183,36 @@ export function BahiaMap({ indices, municipios }: BahiaMapProps) {
       // Glifos ausentes não quebram o mapa; outros erros vão para o console.
       console.error("[mapa]", event.error?.message ?? event);
     });
+
+    // Mar sutil animado: brilhos suaves à deriva sobre o oceano.
+    // Desligado automaticamente para quem prefere movimento reduzido.
+    const canvasMar = document.createElement("canvas");
+    canvasMar.width = 256;
+    canvasMar.height = 256;
+    const ctxMar = canvasMar.getContext("2d");
+    let intervaloMar: number | undefined;
+    const desenharMar = (t: number) => {
+      if (!ctxMar) return null;
+      const T = 256;
+      ctxMar.fillStyle = "#e9eef6";
+      ctxMar.fillRect(0, 0, T, T);
+      for (const b of BOLHAS_MAR) {
+        const x = b.x + Math.sin(t * b.freq + b.fase) * b.dx;
+        const y = b.y + Math.cos(t * b.freq * 0.83 + b.fase) * b.dy;
+        // Espelhado em grade 3x3 para o tile repetir sem emendas.
+        for (const ox of [-T, 0, T]) {
+          for (const oy of [-T, 0, T]) {
+            const g = ctxMar.createRadialGradient(x + ox, y + oy, 0, x + ox, y + oy, b.r);
+            g.addColorStop(0, `rgba(${b.cor},${b.alpha})`);
+            g.addColorStop(1, `rgba(${b.cor},0)`);
+            ctxMar.fillStyle = g;
+            ctxMar.fillRect(0, 0, T, T);
+          }
+        }
+      }
+      return ctxMar.getImageData(0, 0, T, T);
+    };
+
     map.on("load", async () => {
       const [terra, geojson, contorno] = await Promise.all([
         fetch("/geo/terra.geojson").then((r) => r.json()),
@@ -154,16 +232,31 @@ export function BahiaMap({ indices, municipios }: BahiaMapProps) {
 
       const corPreenchimento = obterCorPreenchimento(indices);
 
-      // Layer 1. Oceano (superfície única Neumorphism semi-transparente para o gradiente ambiental)
+      // Layer 1. Oceano com mar sutil animado (mundo inteiro: sem emendas)
       map.addSource("ocean-source", { type: "geojson", data: FULL_WORLD_OCEAN });
+      if (!movimentoReduzido) {
+        const frame0 = desenharMar(0);
+        if (frame0) {
+          map.addImage("mar-anim", frame0, { pixelRatio: 1 });
+          let frame = 0;
+          intervaloMar = window.setInterval(() => {
+            if (mapRef.current !== map) return;
+            frame += 1;
+            const img = desenharMar(frame * 0.09);
+            if (img) {
+              map.updateImage("mar-anim", img);
+              map.triggerRepaint();
+            }
+          }, 150);
+        }
+      }
       map.addLayer({
         id: "ocean-fill",
         type: "fill",
         source: "ocean-source",
-        paint: {
-          "fill-color": "#eef1f7",
-          "fill-opacity": 0.58,
-        },
+        paint: movimentoReduzido
+          ? { "fill-color": "#e9eef6", "fill-opacity": 0.58 }
+          : { "fill-pattern": "mar-anim" },
       });
 
       // Layer 2. Terra fora da Bahia
@@ -340,12 +433,7 @@ export function BahiaMap({ indices, municipios }: BahiaMapProps) {
           | [number, number]
           | undefined;
         if (centroide) {
-          map.flyTo({
-            center: centroide,
-            zoom: Math.max(map.getZoom(), 9.2),
-            duration: 750,
-            essential: true,
-          });
+          voarPara(centroide);
         }
 
         setSelecao({ municipioId });
@@ -366,6 +454,7 @@ export function BahiaMap({ indices, municipios }: BahiaMapProps) {
     });
 
     return () => {
+      if (intervaloMar !== undefined) window.clearInterval(intervaloMar);
       map.remove();
       mapRef.current = null;
     };
@@ -400,12 +489,7 @@ export function BahiaMap({ indices, municipios }: BahiaMapProps) {
 
       const cent = centroidesRef.current.get(id);
       if (cent) {
-        map.flyTo({
-          center: cent,
-          zoom: Math.max(map.getZoom(), 9.2),
-          duration: 750,
-          essential: true,
-        });
+        voarPara(cent);
       }
     }
     setSelecao({ municipioId: id });

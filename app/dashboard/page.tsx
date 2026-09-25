@@ -32,7 +32,7 @@ export const metadata: Metadata = {
     "Panorama dos resultados do mapeamento do Turismo LGBTQIAPN+ nos municípios da Bahia.",
 };
 
-export const revalidate = 0;
+export const revalidate = 60;
 
 /** Map icon name strings to lucide-react components */
 const ICONE_MAP: Record<string, React.ReactNode> = {
@@ -59,7 +59,7 @@ const CORES_EIXOS = [
 ];
 
 export default async function DashboardPage() {
-  const indices = await getIndicesPublicos();
+  const indices = await getIndicesPublicos(60);
 
   const estatisticas = calcularEstatisticasGerais(indices);
   const kpis = calcularKpis(indices);

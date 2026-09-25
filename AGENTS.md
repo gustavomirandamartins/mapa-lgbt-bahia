@@ -35,13 +35,15 @@ npm run lint   # eslint
 
 - **Motor do IDT**: `lib/idt.ts` é módulo **autocontido, sem imports de
   runtime** — o mesmo arquivo roda no client, no servidor e no Node puro
-  (testes). Não quebrar essa propriedade. Toda mudança de regra de cálculo
+  (testes). Não quebrar essa propriedade. Toda mudança de regra de validação
   exige atualizar `lib/idt.test.ts` e `docs/`.
-- **Metodologia oficial** (fonte da verdade): `docs/IDT_LGBT_Calculo.md` e
-  `docs/IDT_LGBT_Completo.md`. 7 eixos, 35 perguntas, pesos 20/15/15/15/10/15/10,
-  escala 0–4 (eixos 1–2 usam 0|2|4), nota final 0–100, 5 faixas.
-- **O cálculo é sempre refeito no servidor** (`lib/actions/avaliacao.ts`).
-  O cliente nunca envia notas.
+- **Metodologia oficial** (fonte da verdade): o questionário vigente está em
+  `lib/idt.ts` (`IDT_QUESTIONARIO`) — metodologia TGS-DT de **mapeamento, sem
+  pontuação**: 7 eixos, 49 perguntas (rádio obrigatórias; checkbox/texto
+  opcionais), status Mapeado/Não Mapeado. `docs/IDT_LGBT_*.md` descrevem a
+  metodologia de pontuação anterior e são referência histórica.
+- **A validação é sempre refeita no servidor** (`validarRespostas` em
+  `lib/actions/avaliacao.ts` via `calcularIdt`). O cliente nunca envia notas.
 - **Next 16**: middleware chama-se **`proxy.ts`** (named export `proxy`).
   `cookies()` é assíncrono. `params` em páginas dinâmicas é `Promise`.
 - **Auth/perfis**: signup cria `profiles` via trigger `handle_new_user`
@@ -49,10 +51,11 @@ npm run lint   # eslint
   `lib/auth-guards.ts` (`requireUser`, `requireAdmin`).
 - **RLS**: a tabela `avaliacoes` é acessível a anon apenas para avaliações
   aprovadas (policy em `0004`) e somente nas colunas públicas (`municipio_id`,
-  `nota_final`, `classificacao`, `notas_eixos`, `submitted_at`, `status`).
-  O mapa público lê a view `indice_publico`, criada com
-  `security_invoker = true` para respeitar a RLS do invocador. Policies em
-  `supabase/migrations/0002_policies.sql` e `0004_view_security_invoker.sql`.
+  `nota_final`, `classificacao`, `notas_eixos`, `respostas`, `submitted_at`,
+  `status` — sem `user_id`; ver `0008`). O mapa público lê a view
+  `indice_publico`, criada com `security_invoker = true` para respeitar a RLS
+  do invocador. Policies em `supabase/migrations/0002_policies.sql`,
+  `0004_view_security_invoker.sql` e `0008_restringe_colunas_anon.sql`.
 - **Fluxo de aprovação**: perfil `pendente` → admin aprova → gestor responde
   questionário → avaliação `pendente` → admin aprova → publicada no mapa
   (versão anterior vira `substituida`).
